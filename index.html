@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전자공시 시그널 — 공시로 읽는 투자의 기술</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAF8F5;
+  --bg-sidebar: #F0EDE6;
+  --bg-card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-secondary: #555555;
+  --text-light: #8C8C8C;
+  --accent: #9E7A2F;
+  --accent-light: #C4A24D;
+  --accent-bg: #F9F5ED;
+  --border: #DDD7CA;
+  --border-light: #EBE7DE;
+  --green: #1B6B3A;
+  --green-bg: #EEF6F0;
+  --red: #A82020;
+  --red-bg: #FDF2F2;
+  --shadow: 0 1px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+  --chapter-width: 720px;
+  --serif: 'Noto Serif KR', 'Batang', Georgia, serif;
+  --sans: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --display: 'Playfair Display', var(--serif);
+  --transition: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 17px; }
+
+body {
+  font-family: var(--serif);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.9;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* === SIDEBAR NAV === */
+.sidebar {
+  position: fixed; top: 0; left: 0;
+  width: 280px; height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  padding: 2.5rem 0;
+  transition: transform 0.4s var(--transition);
+}
+
+.sidebar-header {
+  padding: 0 1.75rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+
+.sidebar-header .book-icon {
+  font-size: 1.1rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  font-family: var(--sans);
+  font-weight: 700;
+}
+
+.sidebar-header .book-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  font-family: var(--sans);
+  margin-top: 0.35rem;
+  letter-spacing: 0.04em;
+}
+
+.sidebar nav { padding: 0 0.875rem; }
+
+.sidebar .nav-chapter {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 1.25rem 0.75rem 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.sidebar a {
+  display: block;
+  padding: 0.5rem 0.875rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.25s var(--transition);
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+.sidebar a:hover { background: rgba(158,122,47,0.07); color: var(--text); }
+.sidebar a.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 500;
+  box-shadow: inset 2px 0 0 var(--accent);
+  border-radius: 0 6px 6px 0;
+}
+
+.sidebar a.nav-special {
+  color: var(--accent);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* === MOBILE MENU === */
+.menu-toggle {
+  display: none;
+  position: fixed; top: 1rem; left: 1rem;
+  z-index: 200;
+  width: 44px; height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.2s;
+}
+
+.menu-toggle:active { transform: scale(0.92); }
+
+.menu-toggle span {
+  display: block; width: 18px; height: 2px;
+  background: var(--text);
+  position: relative;
+  transition: all 0.3s;
+}
+
+.menu-toggle span::before, .menu-toggle span::after {
+  content: ''; position: absolute; left: 0;
+  width: 18px; height: 2px; background: var(--text);
+  transition: all 0.3s;
+}
+.menu-toggle span::before { top: -6px; }
+.menu-toggle span::after { top: 6px; }
+
+.menu-open .menu-toggle span { background: transparent; }
+.menu-open .menu-toggle span::before { top: 0; transform: rotate(45deg); }
+.menu-open .menu-toggle span::after { top: 0; transform: rotate(-45deg); }
+
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 90;
+  opacity: 0; transition: opacity 0.3s;
+}
+
+.menu-open .overlay { display: block; opacity: 1; }
+
+/* === MAIN CONTENT === */
+.main {
+  margin-left: 280px;
+  min-height: 100vh;
+}
+
+/* === COVER === */
+.cover {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(170deg, #FAF8F5 0%, #F2EDE2 40%, #E8E0D0 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 3rem 2rem;
+}
+
+.cover::before {
+  content: '';
+  position: absolute; top: -20%; right: -5%;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(158,122,47,0.05) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: gentlePulse 8s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.cover::after {
+  content: '';
+  position: absolute; bottom: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+.cover-content {
+  text-align: center;
+  max-width: 560px;
+  animation: fadeUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cover-badge {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2.5rem;
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid rgba(158,122,47,0.4);
+  border-radius: 2rem;
+}
+
+.cover h1 {
+  font-family: var(--serif);
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.cover h1 em {
+  font-family: var(--display);
+  font-style: italic;
+  color: var(--accent);
+}
+
+.cover .subtitle {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.cover .author {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-light);
+  letter-spacing: 0.12em;
+}
+
+.cover .divider-line {
+  width: 48px; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  margin: 1.75rem auto;
+}
+
+/* === CHAPTER SECTIONS === */
+.chapter {
+  max-width: var(--chapter-width);
+  margin: 0 auto;
+  padding: 5rem 2rem 5.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.chapter:last-child { border-bottom: none; }
+
+.chapter-label {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  opacity: 0.85;
+}
+
+.chapter h2 {
+  font-family: var(--serif);
+  font-size: 1.85rem;
+  font-weight: 900;
+  line-height: 1.4;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+}
+
+.chapter h3 {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 3rem 0 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.chapter h3:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.chapter h4 {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 2.25rem 0 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.chapter p {
+  margin-bottom: 1.35rem;
+  text-align: justify;
+  word-break: keep-all;
+  color: var(--text);
+}
+
+.chapter strong { color: var(--text); font-weight: 700; }
+
+/* === BLOCKQUOTE (핵심 메시지) === */
+.chapter blockquote {
+  margin: 2.75rem 0;
+  padding: 1.75rem 2rem 1.75rem 1.75rem;
+  background: linear-gradient(135deg, var(--accent-bg) 0%, rgba(249,245,237,0.5) 100%);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.92rem;
+  line-height: 1.8;
+  box-shadow: 0 2px 8px rgba(158,122,47,0.04);
+  position: relative;
+}
+
+.chapter blockquote::before {
+  content: '\201C';
+  position: absolute;
+  top: -0.1rem; left: 0.75rem;
+  font-family: var(--display);
+  font-size: 2.5rem;
+  color: var(--accent);
+  opacity: 0.15;
+  line-height: 1;
+}
+
+.chapter blockquote strong { color: var(--accent); }
+
+/* === TABLES === */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 2rem 0 2.5rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04), 0 0 0 1px var(--border-light);
+}
+
+.chapter table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.chapter thead th {
+  background: var(--bg-sidebar);
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1.5px solid var(--border);
+}
+
+.chapter tbody td {
+  padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+}
+
+.chapter tbody tr:last-child td { border-bottom: none; }
+.chapter tbody tr:hover { background: rgba(158,122,47,0.025); }
+
+/* Green/Red signal columns */
+.chapter td:nth-child(2) { color: var(--green); font-weight: 500; }
+.chapter td:nth-child(3) { color: var(--red); font-weight: 500; }
+
+/* === HORIZONTAL RULE === */
+.chapter hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-light), var(--border), var(--border-light));
+  margin: 2.25rem 0;
+}
+
+/* === PROGRESS BAR === */
+.progress-bar {
+  position: fixed; top: 0; left: 280px; right: 0;
+  height: 2px;
+  background: transparent;
+  z-index: 50;
+}
+
+.progress-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  width: 0;
+  transition: width 0.2s var(--transition);
+  box-shadow: 0 0 8px rgba(158,122,47,0.3);
+}
+
+/* === BACK TO TOP === */
+.back-to-top {
+  position: fixed; bottom: 2.5rem; right: 2.5rem;
+  width: 42px; height: 42px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  opacity: 0; transform: translateY(12px);
+  transition: all 0.35s var(--transition);
+  z-index: 50;
+  font-size: 1rem;
+  color: var(--text-light);
+}
+
+.back-to-top.visible { opacity: 1; transform: translateY(0); }
+.back-to-top:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* === FOOTER === */
+.book-footer {
+  max-width: var(--chapter-width);
+  margin: 0 auto;
+  padding: 4rem 2rem 5rem;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: var(--text-light);
+  letter-spacing: 0.02em;
+}
+
+.book-footer .footer-divider {
+  width: 32px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 auto 2rem;
+}
+
+/* === SELECTION === */
+::selection {
+  background: rgba(158,122,47,0.15);
+  color: var(--text);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 960px) {
+  .sidebar { transform: translateX(-100%); }
+  .menu-open .sidebar { transform: translateX(0); }
+  .menu-toggle { display: flex; }
+  .main { margin-left: 0; }
+  .progress-bar { left: 0; }
+  .cover h1 { font-size: 2.2rem; }
+  html { font-size: 16px; }
+}
+
+@media (max-width: 600px) {
+  .chapter { padding: 3.5rem 1.5rem 4rem; }
+  .cover h1 { font-size: 1.75rem; }
+  .cover .subtitle { font-size: 0.95rem; }
+  .chapter h2 { font-size: 1.45rem; }
+  .chapter h3 { font-size: 1.1rem; }
+  .chapter table { font-size: 0.75rem; }
+  .chapter thead th, .chapter tbody td { padding: 0.55rem 0.7rem; }
+  .sidebar { width: 270px; }
+  .chapter blockquote { padding: 1.25rem 1.25rem 1.25rem 1.25rem; }
+  .table-wrap { margin: 1.5rem -0.5rem 2rem; border-radius: 8px; }
+  .table-wrap::after {
+    content: '← 좌우 스크롤';
+    display: block;
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    color: var(--text-light);
+    padding: 0.4rem 0;
+  }
+}
+
+/* Scrollbar */
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+/* Print */
+@media print {
+  .sidebar, .menu-toggle, .progress-bar, .back-to-top, .overlay { display: none !important; }
+  .main { margin-left: 0; }
+  .chapter { page-break-after: always; padding: 2rem 0; }
+  .cover { min-height: auto; page-break-after: always; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mobile Menu Toggle -->
+<button class="menu-toggle" onclick="toggleMenu()" aria-label="목차 열기">
+  <span></span>
+</button>
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<!-- Progress Bar -->
+<div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="book-icon">📘 전자공시 시그널</div>
+    <div class="book-subtitle">공시로 읽는 투자의 기술</div>
+  </div>
+  <nav>
+    <a href="#cover" class="nav-special">표지</a>
+    <a href="#prologue" class="nav-special">프롤로그</a>
+
+    <div class="nav-chapter">제1장 — 투자의 기준</div>
+    <a href="#ch1-1">1.1 노이즈의 시대, 유일한 나침반</a>
+    <a href="#ch1-2">1.2 공시를 대하는 투자자의 자세</a>
+    <a href="#ch1-3">1.3 정보의 격차를 수익의 기회로</a>
+
+    <div class="nav-chapter">제2장 — 공시의 이해</div>
+    <a href="#ch2-1">2.1 공시는 왜 존재하는가</a>
+    <a href="#ch2-2">2.2 공시의 종류와 체계</a>
+    <a href="#ch2-3">2.3 핵심 공시 유형별 해부</a>
+
+    <div class="nav-chapter">제3장 — 기업의 체력 검증</div>
+    <a href="#ch3-1">3.1 비즈니스 모델</a>
+    <a href="#ch3-2">3.2 재무의 진실</a>
+    <a href="#ch3-3">3.3 경영진과 주인</a>
+
+    <div class="nav-chapter">제4장 — 실전 시그널 필터</div>
+    <a href="#ch4-1">4.1 수주/공급계약</a>
+    <a href="#ch4-2">4.2 자금조달 CB/BW/유상증자</a>
+    <a href="#ch4-3">4.3 내부자 움직임</a>
+    <a href="#ch4-4">4.4 업종별 특화 가이드</a>
+    <a href="#ch4-5">4.5 감사의견과 관리종목</a>
+
+    <div class="nav-chapter">제5장 — 의사결정 매뉴얼</div>
+    <a href="#ch5-1">5.1 선반영과 재료 소멸</a>
+    <a href="#ch5-2">5.2 기업 가치 평가</a>
+    <a href="#ch5-3">5.3 매수와 매도의 골든타임</a>
+    <a href="#ch5-4">5.4 최종 체크리스트</a>
+
+    <a href="#epilogue" class="nav-special" style="margin-top:0.5rem">에필로그</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- COVER -->
+  <section class="cover" id="cover">
+    <div class="cover-content">
+      <div class="cover-badge">Investment Guide 2026</div>
+      <h1>전자공시 <em>Signal</em></h1>
+      <p class="subtitle">공시로 읽는 투자의 기술</p>
+      <div class="divider-line"></div>
+      <p class="author">DART 공시 데이터 기반 · 실전 투자 의사결정 가이드북</p>
+    </div>
+  </section>
+
+  <!-- PROLOGUE -->
+  <section class="chapter" id="prologue">
+    <div class="chapter-label">Prologue</div>
+    <h2>이 책의 전제: 공시는 투자자의 가장 확실한 도구다</h2>
+    <hr>
+    <p>DART에 '단일판매·공급계약 체결 — 계약금액 1,247억 원, 매출액 대비 23.4%' 공시가 올라온다. 이 공시를 사전에 모니터링하고 있던 투자자는 이미 해당 기업의 수주잔고 추이, 전방산업의 설비투자 확대, 현재 밸류에이션까지 검토를 마친 상태다. 공시 확인 후 분석 프레임워크에 따라 매수 판단을 내린다.</p>
+    <p>같은 시간, 포털 댓글과 리딩방 정보에 의존하는 투자자는 주가가 이미 움직인 뒤에야 공시를 확인한다. 추격 매수 후 조정이 오면 손절한다. 두 투자자의 차이는 재능이나 운이 아니다. <strong>법적 책임이 수반된 공시 데이터를 체계적으로 활용하는 시스템</strong>이 있느냐 없느냐의 차이다.</p>
+    <hr>
+    <p>이 책은 전자공시(DART) 데이터를 기반으로 투자 의사결정을 내리는 실전 프레임워크를 다룬다. DART에는 매일 800건 이상의 공시가 올라온다. 사업보고서, 주요사항보고서, 지분변동, 유상증자, 감사보고서 — 이 공시들에는 대표이사와 감사인의 서명이 수반되며, 허위 기재 시 법적 처벌이 따른다. 증권가 루머나 SNS 종목 추천과는 본질적으로 다른 정보원이다.</p>
+    <p>그럼에도 대부분의 개인투자자는 공시를 체계적으로 활용하지 못한다. 공시량이 많고, 용어가 어렵고, 분석 프레임워크가 없기 때문이다. 이 책은 그 문제를 해결하기 위한 실용 가이드다.</p>
+    <hr>
+    <p><strong>제1장</strong>에서는 공시 데이터가 갖는 정보적 우위와 DART 활용법을 다룬다. <strong>제2장</strong>에서는 공시가 왜 존재하는지, 어떤 종류가 있는지, 각 공시 유형이 투자자에게 무엇을 의미하는지 기초부터 체계적으로 정리한다. <strong>제3장</strong>에서는 사업보고서를 통해 기업의 비즈니스 모델, 재무 체력, 경영진의 신뢰도를 검증하는 방법을 설명한다. <strong>제4장</strong>은 이 책의 핵심으로, 수주 공시, 자금조달, 내부자 움직임, 업종별 특화 지표, 감사의견까지 — 주요 공시 유형별로 긍정(+)과 부정(-) 시그널을 판별하는 기준을 제시하며, 실제 사례 분석을 포함한다. <strong>제5장</strong>에서는 분석된 시그널을 매수·매도 의사결정으로 연결하는 구체적 매뉴얼을 다룬다.</p>
+    <p>각 섹션의 끝에는 시그널 대조표를 수록했다. 이 대조표는 공시를 분류하고 판단하는 실무 도구로 활용할 수 있다.</p>
+    <hr>
+    <p>이 책의 활용법은 단순하다. DART(dart.fss.or.kr)에서 관심 종목의 최신 사업보고서를 열고, '사업의 내용'과 '재무에 관한 사항' 섹션을 이 책의 프레임워크에 따라 읽어보라. 처음에는 시간이 걸리지만, 반복할수록 핵심 항목을 빠르게 포착하는 능력이 생긴다.</p>
+  </section>
+
+  <!-- Content will be injected by JavaScript from the MD files -->
+  <div id="chapters-container"></div>
+
+  <!-- FOOTER -->
+  <div class="book-footer">
+    <div class="footer-divider"></div>
+    <p>© 2026 전자공시 시그널 — 공시로 읽는 투자의 기술</p>
+    <p style="margin-top:0.5rem">본 가이드북은 투자 교육 목적으로 제작되었으며, 특정 종목에 대한 매수·매도 추천이 아닙니다.</p>
+  </div>
+
+</div>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0})">↑</button>
+
+<script>
+// === CHAPTER DATA ===
+const chapters = [
+// CH 1.1
+{id:"ch1-1", label:"제1장 · 1.1", title:"노이즈의 시대, 유일한 나침반", sections:[
+{h:"정보의 홍수 속에서 살아남기", p:[
+"매일 아침 눈을 뜨면 수백 개의 뉴스가 쏟아진다. 증권사 리포트, 유튜브 전문가, 텔레그램 리딩방, SNS의 종목 추천까지. 우리는 지금 <strong>정보과부하</strong>의 한가운데에 서 있다. 문제는 이 정보들 대부분이 누군가의 의견이거나, 확인되지 않은 루머이거나, 특정 의도를 가진 가공된 메시지라는 점이다.",
+"투자의 세계에서 <strong>시그널과 노이즈</strong>를 구분하는 것은 생존의 문제다. 노이즈에 휘둘리면 감정적 매매를 하게 되고, 감정적 매매는 계좌를 갉아먹는다. 그렇다면 이 혼란 속에서 투자자가 기댈 수 있는 유일한 나침반은 무엇인가?",
+"답은 명확하다. <strong>팩트(Fact)</strong>, 즉 법적 책임이 수반되는 공식 데이터다."
+]},
+{h:"DART: 법적 책임이 담보하는 원천데이터", p:[
+"대한민국 자본시장에서 가장 신뢰할 수 있는 <strong>공식창구</strong>는 금융감독원 전자공시시스템, 즉 <strong>DART(Data Analysis, Retrieval and Transfer System)</strong>다. DART에 공시되는 모든 정보는 「자본시장과 금융투자업에 관한 법률」에 따라 <strong>법적책임</strong>이 부과된다. 기업이 사업보고서에 허위 사실을 기재하면 형사처벌과 과징금이 부과된다.",
+"이것이 DART가 단순한 정보 사이트가 아닌 이유다. 유튜브 전문가의 말에는 법적 책임이 없다. 텔레그램 리딩방의 종목 추천에도 처벌 조항이 없다. 하지만 DART에 올라온 사업보고서, 주요사항보고서, 지분변동 공시에는 대표이사와 감사인의 서명이 찍혀 있고, <strong>허위기재처벌</strong>이라는 강력한 제재가 뒷받침된다. 이것이 <strong>원천데이터</strong>로서 DART가 갖는 <strong>데이터의 무게</strong>이며, 다른 어떤 정보원도 대체할 수 없는 <strong>신뢰성</strong>의 원천이다."
+]},
+{h:"팩트체크의 시작점", p:[
+"현명한 투자자는 어떤 정보를 접하든 반드시 <strong>팩트체크</strong>를 거친다. '이 회사가 대규모 수주를 받았다'는 소문을 들었다면, DART에서 해당 기업의 공시를 확인한다. '실적이 좋을 것'이라는 전망을 들었다면, 직전 분기 사업보고서의 매출과 영업이익 추이를 직접 검증한다.",
+"이 과정은 번거롭게 느껴질 수 있다. 하지만 사후검증의 습관이 쌓이면, 어떤 정보가 신뢰할 만하고 어떤 정보가 노이즈인지 직감적으로 <strong>필터링</strong>할 수 있게 된다. 이것이 바로 정보의 질에 민감해지는 과정이며, 투자자로서 성장하는 첫 번째 관문이다."
+]},
+{h:"DART 실전 활용법: 5분 만에 핵심 공시 찾기", p:[
+"DART(dart.fss.or.kr)에 접속하면 상단에 '공시검색' 메뉴가 있다. 여기서 <strong>회사명을 입력</strong>하고 검색하면 해당 기업의 모든 공시 목록이 시간순으로 나열된다.",
+"가장 먼저 확인할 것은 <strong>정기보고서</strong> 탭이다. 사업보고서(연간), 반기보고서, 분기보고서가 여기에 있다. 사업보고서를 열면 좌측 목차에서 'II. 사업의 내용'과 'III. 재무에 관한 사항'을 클릭하라. 이 두 섹션만 읽어도 기업의 70%를 파악할 수 있다.",
+"다음으로 <strong>주요사항보고서</strong> 탭을 확인한다. 수주 공시, 유상증자, CB 발행, 임원 지분 변동 등이 여기에 올라온다. 'DART 공시알리미' 앱을 설치하면 관심 기업의 공시가 올라올 때 실시간 푸시 알림을 받을 수 있다.",
+"실전 팁: DART 메인 화면의 '오늘의 공시'에서 전체 시장의 주요 공시를 한눈에 훑을 수 있다. 매일 장 시작 전 5분만 투자하면 시장의 맥을 짚는 습관이 생긴다."
+]},
+{h:"투자원칙의 뿌리: 정보의 투명성", p:[
+"한국 자본시장의 <strong>공정공시</strong> 제도는 모든 시장참여자에게 동일한 정보를 동시에 제공하는 것을 목표로 한다. <strong>정보의 투명성</strong>이 확보된 시장에서 기업이 중요한 경영 정보를 특정인에게 먼저 알려주는 행위는 불공정거래로 처벌받는다.",
+"뉴스에 흔들리지 않는 <strong>근거있는 자신감</strong>은 화려한 차트 기술이나 내부 정보에서 오는 것이 아니다. DART라는 공식 창구에서 직접 확인한 팩트, 그리고 그 팩트를 해석할 수 있는 능력에서 온다. 이것이 <strong>투자원칙</strong>의 핵심이자 <strong>투자의 정석</strong>이며, <strong>시장의 신뢰</strong>를 쌓아가는 투자자의 길이다."
+]},
+], quote:"노이즈의 시대에 투자자의 유일한 무기는 법적 책임이 담보된 공식 데이터다. DART는 단순한 공시 사이트가 아니라, 팩트 기반 투자의 출발점이자 최종 검증 도구다.",
+table:{head:["구분","팩트 기반 투자자 (+)","노이즈 기반 투자자 (-)"], rows:[
+["정보 출처","DART 공시, 사업보고서 직접 확인","SNS 루머, 출처 불명 리딩방"],
+["의사결정","팩트체크 → 사후검증 → 필터링","감정적 반응, 확인 없이 매매"],
+["자신감의 근거","법적 책임 담보된 원천데이터","'누군가 그랬다더라'"],
+["투자 결과","근거있는 자신감, 일관된 원칙","흔들리는 판단, 계좌 잠식"],
+["장기 성장","정보의 질 향상, 투자자 성장","같은 실수 반복, 시장 퇴출"]
+]}},
+
+// CH 1.2
+{id:"ch1-2", label:"제1장 · 1.2", title:"공시를 대하는 투자자의 자세", sections:[
+{h:"텍스트 너머의 진실을 읽어라", p:[
+"공시는 단순히 '읽는' 것이 아니라 '해석하는' 것이다. 같은 공시를 보고도 누군가는 매수 기회를 포착하고, 누군가는 아무런 의미를 찾지 못한다. 이 차이를 만드는 것은 <strong>행간읽기</strong> 능력이다.",
+"공시 한 건을 접했을 때, 숙련된 투자자는 자동으로 세 가지 질문을 던진다. 첫째, <strong>공시주체</strong>가 누구인가? 둘째, <strong>공시목적</strong>이 무엇인가? 셋째, <strong>발표시점</strong>이 왜 지금인가? 이 세 질문을 통해 <strong>의도파악</strong>이 가능해지며, 공시 뒤에 숨겨진 <strong>경영진의 고백</strong>을 읽어낼 수 있다. 이것이 <strong>투자자의 시선</strong>으로 텍스트 너머의 진실을 읽는 기본 프레임워크다."
+]},
+{h:"공시의 맥락: 과거와 현재를 연결하라", p:[
+"하나의 공시를 고립된 사건으로 보면 그 의미를 절반밖에 이해하지 못한다. 반드시 <strong>과거 히스토리</strong>와 연결해서 봐야 한다.",
+"예를 들어, 어떤 기업이 '단일판매·공급계약 체결'을 공시했다고 하자. 이 공시만 보면 호재처럼 보인다. 그러나 과거 공시 이력을 확인했더니 비슷한 계약을 3번 체결한 뒤 2번을 정정·해지한 이력이 발견된다면, <strong>공시반복성</strong>에 의심을 갖게 되고 이번 공시의 신뢰도는 급격히 떨어진다.",
+"이처럼 과거 공시와 현재 공시를 하나의 맥락으로 <strong>데이터 연결</strong>하고, 시장 환경·업종 사이클까지 겹쳐 보는 <strong>입체적 사고</strong>가 <strong>분석의 깊이</strong>를 결정한다."
+]},
+{h:"정기공시와 수시공시: 리듬을 파악하라", p:[
+"<strong>정기공시</strong>는 사업보고서(연간), 반기보고서, 분기보고서처럼 정해진 <strong>공시일정</strong>에 따라 제출되는 것으로, 기업의 체력과 재무 건전성을 종합적으로 점검할 수 있는 자료다.",
+"<strong>수시공시</strong>는 예고 없이 나오는 돌발공시다. 대규모 수주, 유상증자, CB 발행, 임원 변동, 소송 제기 등이 해당된다. 수시공시는 그 자체로 주가영향력이 크다.",
+"투자자의 관점에서 정기공시는 '건강검진', 수시공시는 '응급실 알림'이라고 생각하면 이해가 쉽다."
+]},
+{h:"비판적 수용: 공시도 100%는 아니다", p:[
+"공시가 법적 책임이 수반되는 가장 신뢰도 높은 정보원이라 하더라도, <strong>비판적 수용</strong>의 자세는 필수다. 기업은 공시 의무 범위 안에서 최대한 자신에게 유리한 방식으로 정보를 포장할 수 있다.",
+"따라서 투자자는 공시를 맹신하는 것이 아니라, 공시의 맥락 속에서 강조된 것과 감춰진 것을 동시에 파악해야 한다. 무엇을 말하고 있는가만큼, <strong>무엇을 말하지 않고 있는가</strong>가 중요하다."
+]},
+], quote:"공시는 '읽는 것'이 아니라 '해석하는 것'이다. 공시주체, 목적, 시점, 과거 이력을 입체적으로 연결하고, 행간에 숨겨진 경영진의 메시지를 비판적으로 수용할 때 비로소 정보우위가 생긴다.",
+table:{head:["구분","숙련된 해석 (+)","피상적 읽기 (-)"], rows:[
+["행간읽기","공시주체·목적·시점을 교차 분석","제목만 보고 호재/악재 판단"],
+["과거 히스토리","정정·해지 이력까지 추적","현재 공시만 고립적으로 판단"],
+["정기 vs 수시","공시일정에 맞춰 사전 준비","돌발공시에 뒤늦게 반응"],
+["의도파악","경영진의 고백을 맥락 속에서 포착","액면 그대로 수용"],
+["비판적 수용","말한 것과 말하지 않은 것을 동시에 분석","공시 내용을 맹신"]
+]}},
+
+// CH 1.3
+{id:"ch1-3", label:"제1장 · 1.3", title:"정보의 격차를 수익의 기회로", sections:[
+{h:"정보비대칭: 개인투자자의 구조적 불리함", p:[
+"자본시장에는 태생적으로 <strong>정보비대칭</strong>이 존재한다. 기관은 수십 명의 애널리스트가 기업 탐방을 다니고, 전용 데이터 터미널이라는 <strong>기관의 무기</strong>로 실시간 공시를 모니터링하며, 경영진과의 정기 미팅을 통해 비공개 뉘앙스까지 감지한다. <strong>시장효율성</strong> 가설은 모든 정보가 즉시 반영된다고 말하지만, 현실에서는 정보 해석의 속도 차이가 수익의 차이를 만든다.",
+"개인투자자가 이 구조적 불리함을 인식하지 못한 채 '나도 같은 시장에서 거래하니까 공평하다'고 생각하는 것은 위험한 착각이다. 하지만 절망할 필요는 없다. <strong>지식의 격차</strong>는 메울 수 있기 때문이다."
+]},
+{h:"디지털 격차 해소: DART라는 평등한 무기", p:[
+"DART 시스템의 등장과 공시데이터베이스의 전면 디지털화, 이른바 <strong>디지털 격차 해소</strong>는 개인투자자에게 전례 없는 기회를 열어주었다. 지금 이 순간에도 기관 애널리스트가 보는 것과 동일한 사업보고서를 개인투자자도 DART에서 무료로 열람할 수 있다.",
+"문제는 접근이 아니라 활용이다. DART라는 <strong>정보의 평등</strong>한 플랫폼에 하루 800건 이상의 공시가 올라오지만, 적절한 <strong>분석도구</strong>를 갖추고 이를 체계적으로 모니터링하는 개인투자자는 극소수다."
+]},
+{h:"데이터 분석으로 알파를 창출하라", p:[
+"<strong>실전활용</strong>의 예를 들어보자. DART에서 특정 기업의 최근 3년간 분기 실적을 다운로드하고, 매출채권 회전율과 재고자산 추이를 직접 계산해본다. 증권사 리포트의 추정치와 실제 공시 수치를 대조해본다. 이런 <strong>데이터 분석</strong> 작업 하나하나가 <strong>알파 창출</strong>의 기반이 된다.",
+"알파(Alpha)란 시장 평균을 초과하는 수익률, 즉 <strong>수익의 원천</strong>을 의미한다. DART 공시를 체계적으로 분석하는 습관은 남들이 보지 못하는 것을 보는 것과, <strong>선취매전략</strong>으로 남들보다 빠르게 판단하는 것을 동시에 가능하게 한다. 이것이 <strong>시장을 이기는 힘</strong>이다."
+]},
+{h:"공시알림의 전략적 가치", p:[
+"<strong>시간의 가치</strong>는 투자에서 절대적이다. 같은 공시를 30분 먼저 확인하는 것과 30분 늦게 확인하는 것은 완전히 다른 투자 결과를 만들 수 있다.",
+"핵심은 <strong>기회비용</strong>을 인식하는 것이다. 공시를 확인하지 않아서 놓치는 매수 기회, 공시를 늦게 확인해서 대응하지 못한 악재 — 이런 기회비용은 구독료나 시스템 구축 비용보다 훨씬 크다. 공시 기반 투자 체계를 구축하는 것은 <strong>전략적 선택</strong>이자 <strong>성공의 열쇠</strong>다."
+]},
+], quote:"기관과 개인의 정보 격차는 '접근'이 아니라 '활용'에서 발생한다. DART라는 동일한 데이터에 접근할 수 있는 시대, 공시를 체계적으로 분석하고 빠르게 대응하는 능력이 곧 개인투자자의 알파다.",
+table:{head:["구분","정보 격차를 메운 투자자 (+)","정보 격차에 갇힌 투자자 (-)"], rows:[
+["공시 활용","DART 공시알림 설정, 체계적 모니터링","공시 존재 자체를 모름"],
+["데이터 분석","분석도구로 재무 데이터 직접 검증","증권사 목표가만 참고"],
+["대응 속도","선취매전략으로 시장 선도","뉴스 보도 후 추격 매수"],
+["투자 체계","공시 기반 시스템 구축","감(感)에 의존한 종목 선택"],
+["장기 성과","알파 창출, 시장을 이기는 힘","시장 평균 이하 수익률"]
+]}},
+
+// CH 2.1
+{id:"ch2-1", label:"제2장 · 2.1", title:"공시는 왜 존재하는가", sections:[
+{h:"자본시장과 공시 의무의 탄생", p:[
+"주식시장은 본질적으로 정보의 시장이다. 기업의 현재 상태와 미래 전망에 대한 정보가 주가를 결정한다. 그런데 이 정보를 기업 내부자만 독점한다면 어떻게 될까? 경영진과 대주주는 유리한 시점에 주식을 사고팔고, 일반 투자자는 항상 뒤늦게 사실을 알게 된다. 이런 시장에는 아무도 돈을 맡기지 않을 것이다.",
+"이 문제를 해결하기 위해 <strong>공시(公示, Disclosure) 제도</strong>가 만들어졌다. 공시란 기업이 투자자의 판단에 영향을 미칠 수 있는 중요한 정보를 정해진 절차에 따라 공개하는 것을 말한다. 대한민국에서는 「<strong>자본시장과 금융투자업에 관한 법률</strong>」(자본시장법)이 공시의 법적 근거다. 이 법에 따라 상장기업은 재무 상태, 경영 현황, 주요 의사결정 사항 등을 의무적으로 공개해야 한다."
+]},
+{h:"공시 제도의 세 가지 목적", p:[
+"공시 제도는 세 가지 핵심 목적을 가진다. 첫째, <strong>투자자 보호</strong>다. 기업의 재무 상태와 경영 현황이 투명하게 공개되어야 투자자가 합리적인 판단을 내릴 수 있다. 둘째, <strong>시장의 공정성 확보</strong>다. 공시를 통해 모든 시장 참여자가 동일한 정보에 동시에 접근할 수 있게 함으로써 내부자 거래와 정보 독점을 방지한다. 셋째, <strong>자본시장의 효율성 제고</strong>다. 정보가 신속하고 정확하게 시장에 반영될수록, 주가는 기업의 실질 가치에 가까워지고 자본 배분이 효율적으로 이루어진다.",
+"이 세 가지 목적은 서로 연결되어 있다. 투자자가 보호받지 못하면 시장에 자금이 유입되지 않고, 시장이 공정하지 않으면 효율적 가격 형성이 불가능하다. 공시는 자본시장이라는 건물의 기초 인프라다."
+]},
+{h:"공시 의무 위반의 대가", p:[
+"공시 제도에 실효성을 부여하는 것은 <strong>제재의 엄격함</strong>이다. 허위 공시, 중요 사항의 누락, 공시 지연에는 형사처벌(징역·벌금), 과징금, 과태료, 손해배상 책임이 따른다. 금융감독원은 공시 내용의 적정성을 상시 감리하며, 위반 사항이 발견되면 조치를 취한다.",
+"실제로 사업보고서에 허위 매출을 기재한 기업의 대표이사가 실형을 선고받은 사례, 주요 소송 사항을 공시하지 않아 과징금이 부과된 사례 등이 반복적으로 발생한다. 이런 법적 제재가 있기 때문에 DART 공시는 다른 어떤 정보원보다 <strong>신뢰의 무게</strong>가 다르다. 대표이사와 감사인이 서명을 찍는 문서이며, 그 서명에는 법적 책임이 수반된다."
+]},
+{h:"누가 공시를 하는가: 공시 주체와 감독 체계", p:[
+"공시의 주체는 크게 세 가지로 나뉜다. 첫째, <strong>발행회사</strong> — 상장기업이 직접 제출하는 사업보고서, 주요사항보고서 등이 여기에 해당한다. 둘째, <strong>주요주주와 임원</strong> — 지분 변동, 임원의 주식 매매 내역을 보고한다. 셋째, <strong>외부감사인</strong> — 회계법인이 작성하는 감사보고서와 검토보고서가 이에 속한다.",
+"이 모든 공시는 <strong>금융감독원</strong>이 운영하는 전자공시시스템(DART)을 통해 접수되고 공개된다. 한국거래소(KRX)도 별도의 공시 시스템(KIND)을 운영하며, 거래소 규정에 따른 수시공시를 관리한다. 투자자 입장에서는 DART와 KIND를 모두 확인하는 것이 이상적이지만, DART만으로도 핵심 공시의 대부분을 커버할 수 있다."
+]},
+], quote:"공시는 투자자 보호, 시장 공정성, 자본 효율성이라는 세 가지 축 위에 세워진 자본시장의 기초 인프라다. 법적 제재가 뒷받침하는 공시 데이터는 그 어떤 정보원보다 무게가 다르다.",
+table:{head:["구분","공시 제도가 작동할 때 (+)","공시 제도가 부재할 때 (-)"], rows:[
+["투자자","합리적 판단 가능, 정보 접근 평등","내부자에게 일방적 불리, 정보 사각지대"],
+["시장","효율적 가격 발견, 자본 유입 활성화","가격 왜곡, 투자자 이탈"],
+["기업","신뢰 축적, 낮은 자본 조달 비용","불투명 평판, 높은 자금 조달 비용"],
+["규제","위반 시 형사처벌·과징금으로 실효성 확보","자율에 맡기면 정보 은폐 유인 발생"],
+["정보 품질","대표이사·감사인 서명, 법적 책임 수반","출처 불명, 검증 불가능한 정보 범람"]
+]}},
+
+// CH 2.2
+{id:"ch2-2", label:"제2장 · 2.2", title:"공시의 종류와 체계", sections:[
+{h:"공시의 대분류: 정기·수시·공정·자율", p:[
+"공시는 크게 네 가지로 분류된다. 이 분류를 이해하면 DART에서 어떤 공시를 어디서 찾아야 하는지, 그리고 각 공시가 갖는 정보의 성격이 무엇인지를 체계적으로 파악할 수 있다.",
+"<strong>정기공시</strong>는 법으로 정해진 일정에 따라 반복적으로 제출하는 보고서다. 사업보고서(연간), 반기보고서, 분기보고서가 대표적이며, 기업의 종합적인 체력 검진표에 해당한다. <strong>수시공시</strong>는 투자 판단에 중대한 영향을 미치는 사건이 발생했을 때 즉시 제출하는 공시다. 대규모 수주, 유상증자, 합병, 임원 변동 등이 해당되며, 발생 시점에서 빠르게 공개해야 하므로 주가에 즉각적인 영향을 미친다."
+]},
+{h:"공정공시와 자율공시", p:[
+"<strong>공정공시</strong>는 특히 중요한 개념이다. 기업이 애널리스트, 기관투자자 등 특정인에게 중요한 정보를 제공한 경우, 같은 정보를 지체 없이 전체 시장에도 공개해야 하는 제도다. 예를 들어, IR 미팅에서 '내년 매출 목표 30% 성장'이라는 정보를 기관에 전달했다면, 동일한 내용을 공정공시로 DART에 올려야 한다. 이 제도가 없다면 기관만 유리한 정보를 먼저 알게 되는 구조적 불공정이 발생한다.",
+"<strong>자율공시</strong>는 법적 의무는 아니지만 기업이 자발적으로 공개하는 정보다. 실적 전망치(가이던스), 배당 계획, 신사업 진출 방향 등을 자율공시로 발표하기도 한다. 자율공시는 기업이 시장과 적극적으로 소통하겠다는 의지의 표현이므로, 자율공시가 활발한 기업은 투자자 친화적이라 볼 수 있다."
+]},
+{h:"정기공시의 세부 구조", p:[
+"<strong>사업보고서</strong>는 정기공시의 꽃이다. 매 사업연도 종료 후 90일 이내에 제출하며, 기업의 모든 것을 담고 있다. 사업의 개요, 주요 제품·서비스, 매출 구성, 재무제표, 임원 현황, 주주 구성, 계열사 관계, 소송 현황까지 — 한 기업을 이해하기 위한 가장 종합적인 문서다.",
+"<strong>반기보고서</strong>는 상반기(1~6월) 실적을 정리한 보고서로, 사업연도 개시 후 45일 이내에 제출한다. <strong>분기보고서</strong>는 1분기(1~3월)와 3분기(7~9월) 실적을 다루며, 역시 45일 이내 제출이 원칙이다. 반기·분기보고서는 사업보고서보다 간략하지만, 실적 추이를 실시간에 가깝게 추적할 수 있는 중간 점검 도구다.",
+"투자자 관점에서 정기공시의 핵심 활용법은 <strong>시계열 비교</strong>다. 최근 4~8분기의 정기보고서를 나란히 놓고 매출, 영업이익, 현금흐름의 변화 방향을 읽는 것이 기업의 체력 변화를 가장 정확하게 파악하는 방법이다."
+]},
+{h:"수시공시의 주요 유형", p:[
+"수시공시는 종류가 매우 다양하지만, 투자자가 반드시 알아야 할 핵심 유형은 다음과 같다.",
+"<strong>주요사항보고서</strong> — 단일판매·공급계약 체결, 타법인 주식 취득·처분, 유상증자·무상증자 결정, 전환사채(CB)·신주인수권부사채(BW) 발행, 합병·분할, 주식교환 등 기업의 중대한 의사결정을 담는다. 주가에 가장 직접적인 영향을 미치는 공시 유형이다.",
+"<strong>지분변동공시</strong> — 최대주주 및 특수관계인, 주요주주(5% 이상 보유자), 임원의 주식 보유 변동을 보고한다. 내부자가 자사 주식을 사고 파는 행위는 그 자체로 강력한 시그널이다.",
+"<strong>거래소공시</strong> — 한국거래소의 유가증권·코스닥시장 공시규정에 따른 공시로, 조회공시(주가 급변 시 거래소가 기업에 사실 확인을 요청), 풍문·보도 확인 등이 포함된다."
+]},
+], quote:"공시의 네 가지 분류 — 정기, 수시, 공정, 자율 — 를 이해하는 것은 DART라는 정보 바다에서 나침반을 갖는 것과 같다. 각 공시 유형의 성격을 알면, 무엇을 언제 어디서 찾아야 하는지가 명확해진다.",
+table:{head:["공시 유형","성격과 주기","투자자에게 주는 의미"], rows:[
+["정기공시 (사업/반기/분기보고서)","법정 일정에 따라 정기 제출","기업의 종합 체력 검진표, 시계열 비교의 기준"],
+["수시공시 (주요사항보고서)","중대 사건 발생 시 즉시 공개","주가 직접 영향, 호재·악재의 원천"],
+["공정공시","특정인 제공 정보를 시장 전체에 동시 공개","기관 정보 우위 차단, 개인투자자 보호"],
+["자율공시","기업의 자발적 정보 제공","투자자 소통 의지, IR 활성도 판단 기준"],
+["지분변동공시","내부자 주식 보유 변동 보고","경영진·대주주의 행동이 보내는 시그널"],
+["거래소공시 (조회공시 등)","주가 급변 시 사실관계 확인","루머 vs 팩트 구분의 공식 채널"]
+]}},
+
+// CH 2.3
+{id:"ch2-3", label:"제2장 · 2.3", title:"핵심 공시 유형별 해부", sections:[
+{h:"사업보고서: 기업의 자서전", p:[
+"사업보고서는 기업이 한 해 동안 무엇을 했고, 현재 어떤 상태이며, 앞으로 어떤 리스크가 있는지를 총정리하는 문서다. 분량이 수백 페이지에 달하지만, 투자자가 집중해야 할 핵심 섹션은 정해져 있다.",
+"<strong>'II. 사업의 내용'</strong> — 회사가 무슨 사업을 하는지, 어떤 제품을 어떤 고객에게 파는지, 시장 환경은 어떤지를 서술한다. 수익구조와 경쟁력의 원천을 파악하는 출발점이다. <strong>'III. 재무에 관한 사항'</strong> — 요약 재무제표, 재무제표 주석, 감사인의 의견 등이 포함된다. 숫자의 실체를 파악하는 핵심 구간이다. <strong>'VIII. 임원 및 직원 등에 관한 사항'</strong> — 임원의 보수, 직원 수 변화, 평균 급여 등을 확인할 수 있다. 경영진의 보상 구조와 인력 변동을 파악하는 데 유용하다."
+]},
+{h:"주요사항보고서: 기업의 중대 결정", p:[
+"주요사항보고서는 기업의 가치에 중대한 영향을 미치는 의사결정이 이루어졌을 때 제출하는 공시다. 투자자 입장에서 주가에 가장 직접적으로 영향을 주는 공시 유형이므로, 그 세부 항목을 알아두는 것이 중요하다.",
+"<strong>단일판매·공급계약 체결</strong> — 매출에 직결되는 대규모 수주나 공급 계약이 체결되었을 때 공시한다. 계약 금액, 매출액 대비 비중, 계약 상대방, 계약 기간이 명시된다. <strong>유상증자 결정</strong> — 신주를 발행하여 자금을 조달하겠다는 결정. 자금의 용도(시설투자 vs 운영자금 vs 채무상환)를 반드시 확인해야 한다. <strong>전환사채(CB)·신주인수권부사채(BW) 발행</strong> — 향후 주식으로 전환될 수 있는 채권을 발행하는 것. 전환가액, 발행 금액, 만기, 투자자 성격이 핵심 체크 포인트다.",
+"<strong>타법인 주식 취득·처분</strong> — 다른 회사의 지분을 사거나 파는 행위. 인수·합병(M&A)의 신호이거나, 투자 자산 정리의 신호일 수 있다. <strong>합병·분할 결정</strong> — 기업 구조의 근본적 변화를 의미하며, 합병 비율, 분할 목적, 존속·소멸 법인 구분이 투자 판단의 핵심이다."
+]},
+{h:"지분변동공시: 내부자의 행동을 읽어라", p:[
+"지분변동공시는 크게 세 가지로 나뉜다. <strong>최대주주 등 소유주식 변동</strong>은 최대주주와 특수관계인(가족, 계열사 등)의 지분 변동을 보고하는 것으로, 경영권의 안정성과 대주주의 의지를 판단하는 핵심 자료다. <strong>임원·주요주주 특정증권등 소유상황보고</strong>는 임원과 10% 이상 주주의 매 거래를 보고하는 것으로, 내부자의 매수·매도 행동 패턴을 실시간으로 추적할 수 있다.",
+"<strong>주식등의 대량보유상황보고(5% 보고)</strong>는 특정인이 상장회사의 주식을 5% 이상 보유하게 되었거나, 보유 비율이 1%p 이상 변동했을 때 제출한다. 이 공시에는 보유 목적(단순투자 vs 경영참여)이 명시되어 있어, 대규모 지분 취득이 우호적 투자인지 적대적 매집인지를 판단하는 단서가 된다."
+]},
+{h:"감사보고서와 검토보고서: 숫자의 신뢰성 보증", p:[
+"기업이 스스로 작성한 재무제표를 독립된 외부 감사인(회계법인)이 검증한 결과물이 <strong>감사보고서</strong>다. 감사의견은 네 단계로 나뉜다. <strong>적정의견</strong>(재무제표가 회계 기준에 따라 적정하게 작성됨), <strong>한정의견</strong>(일부 항목에 문제가 있으나 전체적으로는 신뢰 가능), <strong>부적정의견</strong>(재무제표가 심각하게 왜곡됨), <strong>의견거절</strong>(감사 범위 제한으로 의견 표명 불가).",
+"<strong>적정의견이 아닌 감사의견이 나오면, 그 자체가 매우 강력한 경고 신호</strong>다. 한정의견 이하를 받으면 관리종목 지정 사유가 되며, 연속으로 받으면 상장폐지까지 이어질 수 있다. 반기·분기에는 감사 대신 '검토'를 수행하며, 검토보고서가 제출된다. 검토는 감사보다 범위가 좁지만, 중간 기간의 재무 신뢰성을 확인하는 역할을 한다.",
+"투자자가 기억해야 할 것은 한 가지다. 감사보고서는 재무제표의 '보증서'와 같으며, 그 보증의 등급(적정/한정/부적정/거절)이 투자 의사결정에 결정적 영향을 미친다."
+]},
+], quote:"사업보고서는 기업의 전체 그림을, 주요사항보고서는 중대한 변화를, 지분변동공시는 내부자의 행동을, 감사보고서는 숫자의 신뢰성을 보여준다. 이 네 가지를 체계적으로 읽을 줄 아는 투자자가 정보 우위를 갖는다.",
+table:{head:["공시 유형","핵심 체크 포인트","투자자 활용법"], rows:[
+["사업보고서","사업의 내용, 재무제표, 주석, 임원 현황","기업의 수익구조·재무 체력·경영진 종합 분석"],
+["주요사항보고서 (수주)","계약 금액, 매출 대비 비중, 상대방, 기간","실적 가시성 판단, 수주 잔고 추이 추적"],
+["주요사항보고서 (자금조달)","자금 용도, 발행 조건, 전환가액, 할인율","희석 리스크 계산, 자금 성격 판별"],
+["지분변동공시","변동 방향(매수/매도), 변동 사유, 보유 목적","내부자 확신도·경영권 안정성 판단"],
+["감사보고서","감사의견 등급, 특기사항, 계속기업 불확실성","재무제표 신뢰도 검증, 관리종목 리스크 확인"],
+["5% 대량보유보고","보유 비율, 보유 목적(단순투자 vs 경영참여)","외부 세력의 의도 파악, 경영권 분쟁 감지"]
+]}},
+
+// CH 3.1
+{id:"ch3-1", label:"제3장 · 3.1", title:"이 회사는 어떻게 돈을 남기는가?", sections:[
+{h:"수익구조의 해부: P × Q - C", p:[
+"기업의 본질은 결국 하나로 귀결된다. '어떻게 돈을 버는가?' 사업보고서를 읽을 때 가장 먼저 파악해야 할 것은 해당 기업의 <strong>수익구조</strong>다. 이를 가장 단순하게 표현하면 <strong>제품판가(P) × 판매량(Q) - 원재료비(C)</strong>라는 공식이 된다.",
+"사업보고서의 '사업의 내용' 섹션에서 <strong>매출비중</strong>을 확인하라. 어떤 제품이 전체 매출의 몇 퍼센트를 차지하는지, 그 비중이 어떻게 변하고 있는지가 제품포트폴리오의 건강도를 말해준다."
+]},
+{h:"스프레드 분석: 마진의 원천을 추적하라", p:[
+"투자자에게 매출 성장보다 더 중요한 것은 마진이다. <strong>스프레드분석</strong>이란 판매가와 원가 사이의 차이, 즉 마진의 원천과 추이를 추적하는 것을 말한다.",
+"매출총이익률, 영업이익률, 순이익률 같은 <strong>수익성지표</strong>를 3개년 이상 추적하면 기업의 수익 체질이 개선되고 있는지, 악화되고 있는지를 명확히 판단할 수 있다. <strong>원가경쟁력</strong>이 뒷받침되는 기업은 업황 변동에도 마진을 방어할 수 있으며, 이것이 지속적 <strong>성장의 기반</strong>이 된다."
+]},
+{h:"고객사와 수주잔고: 매출의 확실성", p:[
+"<strong>수주잔고</strong>는 미래 매출의 가시성을 보여주는 핵심 지표다. 수주잔고가 꾸준히 증가하고 있다면, 향후 1~2년의 매출이 상당 부분 확보되어 있다는 의미다.",
+"<strong>고객사 구성</strong>도 중요하다. 매출의 30% 이상을 차지하는 단일 고객사가 있다면, 그 고객사와의 관계 변화가 기업의 존망을 좌우할 수 있다. 해당 기업이 속한 <strong>밸류체인</strong>에서의 위치와 <strong>전방산업</strong>의 성장성도 반드시 확인하라. <strong>시장점유율</strong>이 확대되고 있는 기업은 <strong>가동률</strong> 상승과 함께 규모의 경제를 실현할 가능성이 높다."
+]},
+{h:"경제적 해자와 BM의 확장성", p:[
+"장기 투자자라면 반드시 확인해야 할 것이 <strong>경제적해자(Economic Moat)</strong>와 BM의 확장성이다. 독과점력이나 진입장벽은 사업보고서의 곳곳에 흩어져 있다.",
+"'특허 및 지적재산권' 항목에서 핵심 기술의 독점 여부를 확인할 수 있고, '경쟁 현황'에서 시장 내 경쟁 강도를 파악할 수 있다."
+]},
+], quote:"기업이 돈을 버는 구조(P×Q-C)를 이해하고, 수주잔고·고객 구성·밸류체인·진입장벽을 종합적으로 점검하라. 사업보고서는 이 모든 정보가 법적 책임 하에 기록된 기업의 자화상이다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["수익구조","판가(P) 인상 + 판매량(Q) 증가 + 원가(C) 안정","판가 하락, 원가 상승, 판매량 정체"],
+["수주잔고","전년 대비 증가, 신규 대형 고객 확보","잔고 급감, 주요 고객사 이탈"],
+["시장점유율","꾸준한 확대 추세","경쟁 심화로 점유율 하락"],
+["가동률","80% 이상, 증설 계획 수반","60% 이하, 감산 언급"],
+["진입장벽","특허·인허가·기술 독점 보유","기술 범용화, 후발 진입 가속"]
+]}},
+
+// CH 3.2
+{id:"ch3-2", label:"제3장 · 3.2", title:"숫자가 아닌 돈의 흐름에 집중하라", sections:[
+{h:"당기순이익의 함정", p:[
+"경험 있는 투자자는 한 가지 사실을 잘 알고 있다. 이익은 회계 정책에 따라 조정될 수 있지만, 현금 흐름은 조작하기 어렵다.",
+"<strong>영업활동현금흐름</strong>과 <strong>당기순이익 괴리</strong>를 확인하는 것은 재무 분석의 첫 번째 원칙이다. 당기순이익보다 영업활동현금흐름이 지속적으로 크고 <strong>잉여현금흐름(FCF)</strong>이 양수라면, 이 기업은 우량한 체질을 가진 것이다. 기업의 <strong>비용구조</strong>와 <strong>손익분기점</strong>을 파악하면 어느 수준의 매출에서 흑자 전환이 가능한지 가늠할 수 있다."
+]},
+{h:"매출채권과 재고자산: 숨어 있는 경고등", p:[
+"<strong>매출채권회수</strong>가 느려지고 있다면, 매출은 계상되었지만 실제 대금을 받지 못하고 있다는 의미다.",
+"<strong>재고자산회전율</strong>도 핵심 감시 지표다. 재고가 늘어나는 것은 두 가지 해석이 가능하다. 수요 증가에 대비한 전략적 비축이라면 긍정적이지만, 수요 부진으로 팔리지 않는 제품이 쌓이고 있다면 향후 재고 평가 손실이라는 폭탄이 될 수 있다."
+]},
+{h:"유동성과 재무건전성", p:[
+"아무리 성장성이 좋은 기업이라도 <strong>유동성</strong>이 고갈되면 부도가 난다. <strong>현금성자산</strong>의 규모와 유동비율(유동자산 ÷ 유동부채)은 기업의 단기 지급 능력을 측정한다. <strong>부채비율</strong>과 <strong>단기차입금</strong>의 규모·만기 구조도 <strong>재무건전성</strong>을 판단하는 핵심 지표이며, <strong>자본효율성</strong>(ROE, ROIC)은 투입 자본 대비 수익 창출 능력을 보여준다.",
+"<strong>자본잠식</strong>은 가장 심각한 재무 경고등이다. 결손금이 자본금을 초과하는 완전자본잠식 상태는 상장폐지 사유에 해당한다."
+]},
+{h:"주석 분석: 숨은 부채와 자산의 실체", p:[
+"재무제표의 본문만 봐서는 전체 그림을 파악할 수 없다. 진짜 중요한 정보는 <strong>주석분석</strong>에 있다. 소송 관련 충당부채, 지급보증, 약정사항 등 <strong>숨은 부채</strong>가 주석에 기재되어 있으며, <strong>자산의 실체</strong>를 파악하려면 이 항목을 반드시 확인해야 한다.",
+"<strong>영업권상각</strong>과 <strong>감가상각비</strong>의 방법과 내용연수도 주석에서 확인해야 할 항목이다."
+]},
+{h:"📋 Case Study: 이익은 흑자, 현금은 적자 — 숫자의 함정", p:[
+"<strong>[사례]</strong> 2023년, 코스닥 상장 IT 서비스 기업 B사의 연간 실적이 발표되었다. 매출 1,200억 원, 영업이익 95억 원, 당기순이익 78억 원 — 표면적으로는 나무랄 데 없는 실적이었다. 증권사 리포트들은 '어닝 서프라이즈'로 평가했고, 실적 발표 다음 날 주가는 6% 상승했다.",
+"그러나 사업보고서의 현금흐름표를 열어본 투자자는 다른 그림을 보았다. 영업활동현금흐름이 -42억 원이었다. 이익은 78억 원 흑자인데 현금은 42억 원 적자 — <strong>당기순이익 괴리</strong>가 120억 원에 달했다. 원인은 두 가지였다. 첫째, 매출채권 회전일수가 전년 45일에서 82일로 급증했다. 대형 프로젝트를 수주했지만 대금 회수가 지연되고 있었다. 둘째, 재고자산이 전년 대비 3배로 늘어났는데, 주석을 확인하니 완제품이 아닌 '진행 중인 프로젝트' 비용이 재고로 계상된 것이었다.",
+"이후 6개월간 매출채권 회수는 더 악화되었고, 결국 다음 분기에 대손충당금 45억 원을 설정하며 적자 전환했다. 실적 발표일에 6% 올랐던 주가는 이후 8개월간 45% 하락했다. 당기순이익만 보고 매수한 투자자는 큰 손실을 입었지만, 현금흐름표와 매출채권 추이를 확인한 투자자는 처음부터 이 종목을 피할 수 있었다."
+]},
+], quote:"당기순이익은 회계적 의견이고, 현금흐름은 경영의 팩트다. 영업현금흐름, 매출채권·재고 추이, 유동성, 주석 속 숨은 부채까지 확인해야 기업의 진짜 재무 체력이 보인다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["현금흐름","영업현금흐름 > 당기순이익, FCF 흑자","이익 흑자인데 영업현금흐름 적자"],
+["매출채권","회전일수 안정 또는 단축","회전일수 지속 증가"],
+["재고자산","전략적 비축, 수요 증가 대비","판매 부진에 따른 재고 누적"],
+["유동성","유동비율 150%↑, 현금 충분","유동비율 100%↓, 단기차입 급증"],
+["주석","우발부채 소규모, 영업권 적정","대규모 소송, 영업권 과다"]
+]}},
+
+// CH 3.3
+{id:"ch3-3", label:"제3장 · 3.3", title:"경영권의 안정성과 신뢰도", sections:[
+{h:"최대주주의 지분율: 경영권의 무게", p:[
+"기업에 투자한다는 것은 결국 그 기업을 이끄는 경영진에게 내 돈을 맡기는 행위다. <strong>최대주주지분율</strong>이 30% 이상이면 경영권이 비교적 안정적이고, 20% 미만이면 <strong>경영권분쟁</strong> 가능성을 염두에 둬야 한다. <strong>우호지분</strong>과 <strong>특수관계인</strong> 인사 현황을 함께 확인하면 실질적인 경영권 방어력을 가늠할 수 있다.",
+]},
+{h:"경영권 승계와 지분 변동", p:[
+"한국 시장에서 <strong>경영권승계</strong>와 <strong>지분승계</strong>는 기업 가치에 큰 영향을 미치는 이벤트다. 최대주주가 지분을 꾸준히 늘리고 있다면 <strong>CEO철학</strong>과 책임경영 의지의 표현으로 읽을 수 있고, 반대로 지분을 줄이고 있다면 경영 의지 약화를 의심해봐야 한다. <strong>지주사체제</strong>를 통한 승계 구조는 특히 계열사 간 거래와 함께 분석해야 한다."
+]},
+{h:"이사회와 거버넌스", p:[
+"<strong>이사회 구성</strong>은 기업의 <strong>지배구조</strong>와 거버넌스 수준을 보여주는 거울이다. 사외이사의 경력, 출석률, 안건별 찬반 기록까지 확인하면 거버넌스의 실질을 파악할 수 있다. 경영진의 <strong>보상체계</strong>가 장기 성과와 연동되어 있는지, <strong>소액주주보호</strong>를 위한 장치가 마련되어 있는지도 중요한 평가 항목이다."
+]},
+{h:"계열사 거래와 배당: 주주가치의 흐름", p:[
+"<strong>배당성향</strong>이 꾸준히 유지되거나 증가하는 기업은 주주친화정책을 실천하고 있다고 볼 수 있다. <strong>자사주정책</strong> — 매입 후 소각까지 이행하는지 여부 — 은 주당 가치를 올리는 진정한 주주환원의 척도다.",
+"<strong>과거공시이행</strong> 이력은 경영진의 신뢰도를 측정하는 가장 객관적인 도구다. 한 번 잃은 <strong>신뢰자본</strong>은 회복하기 극히 어렵고, <strong>평판리스크</strong>는 주가에 만성적인 디스카운트로 반영된다."
+]},
+], quote:"기업의 숫자만큼 중요한 것이 그 숫자를 만드는 '사람'이다. 최대주주의 지분 구조, 이사회의 독립성, 배당·자사주 정책, 경영진의 과거 공시 이행 기록을 종합적으로 평가하여 신뢰할 수 있는 기업을 골라내라.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["지분 구조","최대주주 지분율 안정·확대","지분 매각, 경영권 분쟁 가능성"],
+["이사회","사외이사 독립성 확보","형식적 운영, 오너 일가 편중"],
+["배당/자사주","배당성향 안정·증가, 자사주 소각","무배당 지속, 자사주 제3자 배정"],
+["경영진 신뢰","공시 이행률 높음","과대 전망 반복, 정정공시 빈발"]
+]}},
+
+// CH 4.1
+{id:"ch4-1", label:"제4장 · 4.1", title:"매출 성장의 확실한 신호", sections:[
+{h:"공시의 첫 번째 질문: 매출액 대비 얼마인가?", p:[
+"수주·공급계약 공시를 접했을 때 투자자가 가장 먼저 확인해야 할 숫자는 <strong>매출액대비비중</strong>이다. 계약 금액이 직전 연도 매출액의 10% 이상이면 '대규모 수주'로 분류된다.",
+"다만 비중이 크다고 무조건 호재는 아니다. 핵심은 <strong>수익성 확보</strong> 여부다. <strong>계약상대방</strong>이 누구인지, <strong>공급기간</strong>과 <strong>납기일</strong>이 언제인지, <strong>공급단가 변동</strong> 조건이 어떤지 반드시 확인하라. 이를 통해 <strong>미래매출 예측</strong>과 <strong>이익레버리지</strong>를 가늠할 수 있다."
+]},
+{h:"수주잔고의 추세: 미래 매출의 바로미터", p:[
+"개별 수주 공시보다 더 중요한 것은 <strong>수주잔고 추이</strong>다. 수주잔고가 연간 매출의 2배 이상이면, 향후 2년치 일감이 확보되어 <strong>실적가시성</strong>이 높다는 뜻이다. 주가가 저점에 있을 때의 대형 수주는 <strong>바닥권 호재</strong>로 작용하지만, 이미 주가가 크게 오른 상태에서의 수주는 <strong>고점권 재료소멸</strong>로 이어질 수 있다. <strong>선반영 여부</strong>를 반드시 확인하라.",
+"반대로 수주잔고가 급감하고 있다면, 1~2년 후 실적 악화로 직결된다."
+]},
+{h:"계약의 질: 대규모 수주의 이면", p:[
+"<strong>글로벌 고객사</strong>와의 <strong>독점계약</strong>은 최고 수준의 수주다. 반면 <strong>정정공시</strong>가 빈번하거나 <strong>계약해지 이력</strong>이 있는 기업은 공시의 신뢰도 자체가 낮다.",
+"<strong>공시번복</strong>은 시장의 신뢰를 크게 훼손하며, 이후 유사한 호재 공시가 나와도 주가 반응이 둔해지는 '양치기 소년' 효과를 초래한다."
+]},
+{h:"📋 Case Study: 수주 공시의 명과 암", p:[
+"<strong>[사례 A — 긍정]</strong> 2024년 초, 국내 한 반도체 장비 기업이 '단일판매·공급계약 체결' 공시를 냈다. 계약 금액 2,800억 원, 매출액 대비 34%. 계약 상대방은 글로벌 Top 3 파운드리 업체였고, 공급기간은 18개월이었다. 직전 3개 분기 연속 수주잔고가 증가하고 있었고, 정정공시 이력이 전무했다. 공시 당일 주가는 8% 상승했고, 이후 2개월간 추가로 25% 상승했다. 실적가시성과 계약의 질이 모두 충족된 사례다.",
+"<strong>[사례 B — 부정]</strong> 같은 해, 한 중소형 건설 기업이 매출액 대비 45%에 달하는 대규모 수주를 공시했다. 그러나 계약 상대방은 특수관계인이 대표로 있는 비상장 법인이었고, 3개월 후 '계약금액 변경' 정정공시가 나왔다. 계약 금액이 30% 축소되었다. 이 기업은 과거 2년간 유사한 공시를 4번 냈는데, 그중 2건이 해지되었다. 공시 번복의 전형적 패턴이다."
+]},
+], quote:"수주 공시는 매출액 대비 비중, 계약 상대방의 질, 수주잔고 추세, 과거 이행 이력을 종합적으로 평가해야 한다. 같은 수주라도 주가 위치와 시장의 기대 수준에 따라 투자 시그널이 정반대가 될 수 있다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["매출 대비","매출액 대비 10%↑, 대형 수주","소규모 반복 공시, 임팩트 미미"],
+["계약 상대방","글로벌 대기업, 신규 고객 확보","특수관계인, 실체 불분명"],
+["수주잔고","잔고 지속 증가, 매출 대비 2배↑","잔고 급감, 신규 수주 둔화"],
+["공시 이력","정정 없음, 이행률 높음","정정·해지 빈발, 공시 번복"]
+]}},
+
+// CH 4.2
+{id:"ch4-2", label:"제4장 · 4.2", title:"CB/BW/유상증자의 이면", sections:[
+{h:"자금의 성격: 왜 돈이 필요한가?", p:[
+"<strong>시설자금 목적</strong>의 자금 조달은 성장 투자의 신호다. 설비 가동 후 매출과 이익이 증가하면 주당 가치가 오히려 올라갈 수 있다. 이것이 <strong>마중물 효과</strong>다.",
+"반면 <strong>운영자금 압박</strong>에 의한 조달은 경계 신호다. 영업활동으로 충분한 현금을 창출하지 못해 운전자금이나 채무상환을 위해 유상증자를 하는 기업은 근본적인 수익성에 문제가 있을 가능성이 높다. 다만 <strong>재무구조개선</strong>이나 <strong>자본금확충</strong>을 위한 조달은 장기적으로 긍정적일 수 있으므로, <strong>자금의 성격</strong>을 면밀히 구분해야 한다."
+]},
+{h:"유상증자: 지분 희석의 수학", p:[
+"<strong>제3자배정</strong> 유상증자는 특히 주의가 필요하다. <strong>투자자 성격</strong>이 핵심이다. 전략적 파트너가 참여한다면 기업 가치에 대한 외부 검증이지만, 불분명한 투자자라면 의심해야 한다.",
+"<strong>할인율</strong>도 반드시 확인하라. 시가 대비 30% 이상의 할인은 기존 주주에게 불리한 조건이다. <strong>희석률 계산</strong>을 통해 <strong>지분가치 희석</strong>의 규모를 정량적으로 파악해야 하며, <strong>권리락</strong> 이후 주가 영향과 <strong>투자심리 영향</strong>까지 고려해야 한다."
+]},
+{h:"CB와 BW: 전환사채의 시한폭탄", p:[
+"<strong>리픽싱 조건</strong>은 CB의 가장 위험한 독소 조항이다. 주가 하락 → <strong>전환가액</strong> 하향 → 더 많은 주식 발행 → 추가 희석 → 주가 추가 하락의 악순환을 만들 수 있다.",
+"<strong>사채발행</strong> 시 <strong>조달금리</strong>와 표면이자율을 반드시 비교하라. 표면이자율이 0%에 가까운 CB는 투자자가 주식 전환 차익을 노리고 있다는 뜻으로, 전환 가능성이 극히 높아 <strong>오버행 리스크</strong>가 크다. BW의 <strong>신주인수권</strong>은 별도로 분리·매매될 수 있어 추가적인 희석 요인이 된다."
+]},
+{h:"📋 Case Study: 같은 유상증자, 다른 결과", p:[
+"<strong>[사례 A — 마중물]</strong> 2023년, 한 2차전지 소재 기업이 1,500억 원 규모의 주주배정 유상증자를 공시했다. 자금 용도는 '양극재 2공장 신설(시설자금 100%)'. 할인율은 시가 대비 15%였고, 최대주주도 지분율에 비례하여 참여했다. 증설 완공 후 매출이 2배로 증가하면서 주가는 증자가 대비 180% 상승했다. 시설투자 목적의 증자가 마중물이 된 전형적 사례다.",
+"<strong>[사례 B — 희석의 늪]</strong> 한 바이오 기업이 300억 원 규모의 제3자배정 유상증자를 공시했다. 할인율은 시가 대비 35%, 자금 용도는 '운영자금 및 채무상환'. 배정 대상은 해외 소재 투자조합이었다. 리픽싱 조항이 포함된 CB 500억 원을 이미 발행한 상태에서의 추가 조달이었다. 공시 후 1년간 주가는 60% 하락했고, CB 전환가가 세 차례 하향 조정되면서 발행주식수가 40% 증가했다."
+]},
+], quote:"자금조달 공시는 '왜 돈이 필요한가'와 '누구에게, 어떤 조건으로 발행하는가'를 반드시 확인하라. 리픽싱 CB나 제3자배정은 기존 주주 가치를 심각하게 훼손할 수 있다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["자금 목적","시설투자, 증설, R&D","운영자금, 채무상환"],
+["증자 방식","주주배정, 합리적 할인율","제3자배정, 과도한 할인율(30%↑)"],
+["CB/BW 조건","리픽싱 없음, 전환가 시가 근접","리픽싱 포함, 전환가 대폭 할인"],
+["투자자","전략적 파트너, 유명 기관","불분명한 투자자, 특수관계인"]
+]}},
+
+// CH 4.3
+{id:"ch4-3", label:"제4장 · 4.3", title:"지분 변동과 자사주 정책", sections:[
+{h:"임원 장내매수: 가장 강력한 바닥 신호", p:[
+"<strong>임원 장내매수</strong>는 경영진이 자기 돈으로 자사 주식을 공개 시장에서 매수하는 행위다. 이것이 <strong>바닥 신호</strong>로 해석되는 이유는, 기업의 내부 사정을 가장 잘 아는 사람들이 저평가되어 있다고 판단한다는 뜻이기 때문이다.",
+"소액의 형식적 매수와 연봉의 상당 부분을 투입한 확신에 찬 매수는 전혀 다른 시그널이다. <strong>매수단가 분석</strong>을 통해 경영진이 어느 가격대에서 매수했는지 확인하면 <strong>주가부양 의지</strong>와 <strong>내부정보</strong>에 기반한 확신의 정도를 가늠할 수 있다. <strong>시간외매매</strong>로 조용히 매집하는 패턴도 주시해야 한다."
+]},
+{h:"자사주 매입과 소각", p:[
+"<strong>자사주 소각</strong>은 주주가치 제고의 가장 확실한 방법이다. 소각된 만큼 발행주식 수가 줄어들어 주당 순이익이 기계적으로 올라간다.",
+"매입은 했지만 소각하지 않는 자사주는 잠재적인 유통주식수 증가 요인이다. '매입 공시'만으로 환호하고 '소각 여부'를 확인하지 않는 것은 절반만 본 것이다. <strong>자사주신탁</strong>을 활용한 매입은 <strong>경영권방어</strong> 목적일 수 있으므로 소각 의지와 구분해서 판단해야 한다. <strong>배당공시</strong>와 함께 자사주 정책을 종합적으로 평가하라."
+]},
+{h:"대주주 지분 매도와 오버행", p:[
+"<strong>지분매각 사유</strong>를 확인하는 것이 첫 번째다. 상속세 납부 같은 개인 사유도 많지만, 수개월에 걸쳐 지분을 꾸준히 줄이는 것은 <strong>책임경영</strong>에 대한 의지가 약해졌다는 심각한 경고 신호다. 대규모 <strong>블록딜</strong>이 예고되면 단기 수급 충격에 대비해야 한다.",
+"<strong>보호예수 해제</strong> 후 오버행이 소화되면 <strong>오버행 해소</strong>에 따른 <strong>수급개선</strong> 효과로 오히려 매수 기회가 될 수 있다. 매도 가능 물량이 소화된 이후에는 수급 부담이 해소되기 때문이다. 결국 임원 매수·자사주 소각·배당 등 <strong>주주친화정책</strong>을 일관되게 실행하는 기업이 장기적으로 시장의 신뢰를 얻는다."
+]},
+], quote:"내부자의 행동은 말보다 정직하다. 임원의 장내매수와 자사주 소각은 강력한 확신의 표현이고, 대주주의 지속적 매도와 보호예수 해제는 수급의 핵심 변수다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["임원 매수","대규모 장내매수, 연봉 대비 유의미","형식적 소액 매수"],
+["자사주","매입 후 소각, 꾸준한 환원","매입 후 미소각, 제3자 배정"],
+["대주주 매도","개인 사유, 소규모·일회성","지속적 지분 축소, 사유 불명확"],
+["오버행","보호예수 해제 후 물량 소화 완료","대규모 해제 임박, 블록딜 예고"]
+]}},
+
+// CH 4.4
+{id:"ch4-4", label:"제4장 · 4.4", title:"섹터별 핵심 지표", sections:[
+{h:"반도체·디스플레이", p:[
+"반도체는 전형적인 <strong>업종사이클</strong> 산업이다. <strong>업황회복</strong> 국면에서 선제적으로 <strong>반도체증설</strong>을 결정한 기업은 회복기에 시장 점유율을 확대할 수 있다. 사업보고서에서 팹별 가동률 추이와 장비공급 계약 내역을 확인하고, <strong>경쟁사 공시 비교</strong>를 통해 업종 전체의 투자 사이클을 파악하라.",
+"반도체 공시를 읽을 때 핵심은 '선행지표'를 잡는 것이다. 장비 발주 → 설치 → 양산까지 12~18개월이 걸리므로, 장비공급 계약 공시는 1년 뒤 실적의 선행지표다. 재고자산이 급증하면서 가동률이 하락하는 구간은 업황 바닥의 신호이고, 반대로 재고가 소진되면서 ASP(평균판매가격)가 반등하는 구간이 매수 적기다. 디스플레이는 LCD·OLED 패널 가격 추이와 세트 업체의 재고 수준이 핵심 변수다.",
+"<strong>핵심 체크</strong>(<strong>세부지표</strong>): 가동률 추이, CAPEX 규모, 재고자산 수준, ASP 변동, 장비 발주 금액, 고객사 CAPEX 계획"
+]},
+{h:"바이오·제약", p:[
+"<strong>라이선스아웃</strong> 공시는 바이오 기업의 가장 강력한 호재다. 글로벌 제약사가 기술 도입 계약을 체결했다는 것은 <strong>신약파이프라인</strong>의 기술적 가치를 외부에서 검증받았다는 의미다. <strong>특허권확보</strong>와 <strong>해외진출</strong> 여부가 바이오 기업의 장기 성장을 좌우하며, FDA 등 <strong>가이드라인</strong> 충족 여부도 핵심이다.",
+"바이오 공시에서 가장 주의할 점은 <strong>바이오임상</strong> 단계별 성공 확률의 현실이다. Phase 1 성공 확률은 약 60%지만, Phase 3까지 최종 승인에 이르는 확률은 10% 미만이다. 따라서 Phase 1 결과만으로 '대박'을 기대하는 것은 확률적으로 위험하다. 라이선스아웃 공시에서는 계약 구조(선급금 vs 마일스톤 vs 로열티 비율)를 반드시 확인하라. 선급금 비중이 높을수록 기술의 성숙도가 높다는 뜻이다. 또한 파이프라인이 단일 물질에 집중된 기업은 임상 실패 시 주가가 50% 이상 급락할 수 있으므로, 파이프라인 다양성은 리스크 분산의 핵심이다.",
+"<strong>핵심 체크</strong>: 임상 단계별 성공 확률, 파이프라인 다양성, 특허 만료 시점, 라이선스 계약 구조(선급금/마일스톤/로열티)"
+]},
+{h:"2차전지·소재", p:[
+"<strong>2차전지소재</strong>는 전형적인 <strong>수주산업</strong>으로, 글로벌 배터리 셀 메이커와의 공급 계약 여부가 기업가치를 좌우한다. 단일 고객 의존도가 높으면 해당 고객의 생산 계획 변경에 취약해지며, <strong>정책수혜</strong>(IRA, 보조금 등)의 영향도 크다.",
+"2차전지 밸류체인은 양극재 → 음극재 → 분리막 → 전해액 → 셀 → 팩의 구조다. 각 단계별로 핵심 공시가 다르다. 양극재 기업은 리튬·니켈 등 원재료 가격 변동과 장기공급계약(LTA)의 가격 전가 조항이 핵심이고, 분리막·전해액 기업은 기술 전환(건식 분리막, 고체 전해질 등)에 대한 R&D 공시를 주시해야 한다. 증설 공시에서는 CAPA(생산능력) 확대 규모뿐 아니라 가동 시점과 고객 확보 여부를 함께 확인하라. 증설은 했지만 수주가 없으면 고정비 부담만 늘어난다.",
+"<strong>핵심 체크</strong>: 셀 메이커별 수주 잔고, 증설 규모 및 가동 시점, 원재료 가격, LTA 가격 전가 조항, 기술 전환 R&D 현황"
+]},
+{h:"플랫폼·게임·엔터", p:[
+"플랫폼 기업은 MAU, ARPU, GMV, 테이크레이트 등 <strong>플랫폼지표</strong>가 핵심이다. <strong>규제환경</strong>은 플랫폼 기업의 가장 큰 리스크 요인이다. <strong>게임출시</strong> 일정과 <strong>엔터라인업</strong>은 콘텐츠 기업의 실적을 직접 좌우하는 <strong>핵심섹터별 공시</strong> 항목이다.",
+"게임 기업은 신작 출시 일정이 곧 주가 캘린더다. 사업보고서의 '개발 중인 파이프라인' 항목에서 출시 예정작의 장르, 플랫폼(PC/모바일/콘솔), 개발 단계를 확인하고, 이전작의 흥행 성과와 비교하라. 엔터테인먼트 기업은 아티스트 계약 만료 시점, 컴백 일정, 월드투어 규모가 핵심 변수다. 플랫폼 기업의 경우 MAU가 정체되더라도 ARPU가 상승하면 매출은 성장할 수 있으므로, 두 지표를 반드시 함께 봐야 한다. 독점 규제, 인앱결제 수수료 규제 등 정책 변화는 플랫폼 기업의 테이크레이트에 직접 영향을 미친다.",
+"<strong>핵심 체크</strong>: MAU·ARPU 추이, 신작/컴백 일정, 규제 동향, 테이크레이트 변화, 아티스트 계약 현황"
+]},
+], quote:"공시 해석의 프레임워크는 보편적이지만, 섹터별 핵심 지표는 다르다. 반도체의 가동률, 바이오의 임상 단계, 2차전지의 수주처, 플랫폼의 MAU — 각 섹터의 핵심 변수를 알아야 공시의 진짜 의미를 읽을 수 있다.",
+table:{head:["섹터","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["반도체","가동률 회복, CAPEX 확대","가동률 하락, 투자 연기, 재고 급증"],
+["바이오","Phase 3 성공, 라이선스아웃 체결","임상 실패, 파이프라인 공백"],
+["2차전지","글로벌 셀메이커 수주, 증설 착공","고객 다변화 실패, 원재료 급등"],
+["플랫폼","MAU·ARPU 동반 성장","규제 강화, 사용자 이탈"]
+]}},
+
+// CH 4.5
+{id:"ch4-5", label:"제4장 · 4.5", title:"감사의견과 관리종목: 투자자의 최후 방어선", sections:[
+{h:"감사의견: 재무제표의 신뢰등급", p:[
+"<strong>적정의견</strong>은 정상 상태다. <strong>한정의견</strong>은 재무제표의 일부에 중대한 문제가 있다는 경고다. <strong>부적정의견</strong>은 재무제표를 믿을 수 없다는 선언이며, <strong>의견거절</strong>은 감사인이 의견 자체를 표명할 수 없는 상태다.",
+"한정의견 이상은 관리종목 지정 또는 상장폐지의 직접적 사유가 된다. <strong>감사인변경</strong>이 빈번한 기업은 <strong>감사인독립성</strong>에 문제가 있을 수 있으므로, 변경 사유를 반드시 확인하라. <strong>재무투명성</strong>이 확보되지 않은 기업은 투자 대상에서 제외하는 것이 원칙이다."
+]},
+{h:"계속기업 불확실성", p:[
+"감사보고서에서 가장 주의 깊게 봐야 할 문구가 <strong>'계속기업으로서의 존속능력에 유의적 불확실성'</strong>이다. 적정의견이라 하더라도 이 문구가 강조사항으로 기재되어 있다면 노란불이다.",
+"해당 기업의 유동성 상태, 차입금 만기 구조, 영업손실 지속 여부를 즉시 재점검해야 한다. <strong>경고신호 누적</strong> 패턴을 인식하고 <strong>리스크 스크리닝</strong>을 통해 위험 종목을 사전에 걸러내는 것이 <strong>투자자 방어전략</strong>의 핵심이다."
+]},
+{h:"관리종목과 상장폐지", p:[
+"<strong>관리종목 지정</strong>은 상장폐지의 전 단계다. 지정 공시가 나오는 순간 주가는 급락하고, 유동성이 급감한다. <strong>원금보호</strong>의 관점에서, '싸 보여서 매수'하는 것이 가장 위험한 순간이다.",
+"상장폐지는 어느 날 갑자기 일어나는 것이 아니다. 감사의견 비적정 → 관리종목 지정 → <strong>상장적격성 실질심사</strong> → <strong>정리매매</strong> → 상장폐지의 과정이 단계적으로 진행된다. <strong>자본잠식률</strong> 50% 이상, <strong>매출액 미달</strong>, <strong>사업보고서 미제출</strong> 등이 관리종목 지정 사유다. 이 경고 신호를 무시하고 '반등'을 기대하며 보유하는 것이 가장 치명적인 투자 실수다."
+]},
+{h:"📋 Case Study: 경고 신호를 읽은 사람과 무시한 사람", p:[
+"<strong>[타임라인]</strong> 2022년 3월, 코스닥 상장사 A의 감사보고서에 '계속기업 불확실성' 강조사항이 처음 등장했다. 감사의견 자체는 적정이었기에 대부분의 투자자는 이를 간과했다. 같은 해 6월, 감사인이 변경되었다. 9월, 분기보고서에서 자본잠식률이 42%로 집계되었다.",
+"2023년 3월, 연간 감사보고서에서 한정의견이 나왔다. 다음 날 관리종목으로 지정되며 주가는 하한가를 기록했다. 이후 상장적격성 실질심사에 들어갔고, 최종적으로 상장폐지가 결정되었다. 정리매매 기간 주가는 액면가의 10%까지 하락했다.",
+"첫 경고(계속기업 불확실성)에서 최종 상장폐지까지 약 1년. 경고 신호를 읽고 첫 단계에서 매도한 투자자는 손실을 10% 내외로 제한했지만, '반등'을 기대하며 끝까지 보유한 투자자는 원금의 90%를 잃었다."
+]},
+], quote:"감사의견은 재무제표의 신뢰등급이며, 관리종목 지정은 상장폐지의 전 단계다. 이 두 가지를 모니터링하는 것은 수익 추구 이전의 문제 — 원금을 지키기 위한 투자자의 최후 방어선이다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["감사의견","적정의견, 강조사항 없음","한정·의견거절, 계속기업 불확실성"],
+["자본 상태","자본잠식 해소, 자본 확충","자본잠식 지속·심화"],
+["관리종목","해제 요건 충족, 실적 정상화","지정 후 추가 악화, 실질심사 진입"],
+["사업보고서","기한 내 정상 제출","제출 지연·미제출"]
+]}},
+
+// CH 5.1
+{id:"ch5-1", label:"제5장 · 5.1", title:"'선반영'과 '재료 소멸'", sections:[
+{h:"'뉴스에 팔아라'의 진짜 의미", p:[
+"시장은 효율적이다 — 완벽하지는 않지만, 상당한 수준으로. 대규모 수주가 예상되면 공시 전에 이미 <strong>기대감 크기</strong>만큼 주가가 올라가 있다. 이것이 <strong>선반영 주가</strong>다. 실제 공시가 발표되는 순간, <strong>정보의 유효기간</strong>이 만료되고 <strong>정보가치 소멸</strong>이 시작된다. <strong>주가위치 분석</strong>을 통해 선반영 정도를 가늠하는 것이 <strong>매수타이밍</strong>과 <strong>매도타이밍</strong>을 결정하는 출발점이다."
+]},
+{h:"공시 후 주가 흐름의 패턴", p:[
+"<strong>패턴 1:</strong> <strong>단기급등</strong> 후 눌림목. 호재 공시 직후 급등하지만, 차익실현 매물이 나오면서 <strong>주가조정</strong>을 받는다. <strong>변동성관리</strong>와 눌림목 포착이 실전에서 가장 많이 활용되는 매수 전략이다.",
+"<strong>패턴 2:</strong> 갭 상승 후 <strong>추세전환</strong>. 시장의 기대를 크게 뛰어넘는 서프라이즈일 때 상승동력이 유지되며 장기 상승 추세로 전환된다.",
+"<strong>패턴 3: 호재인데 하락.</strong> <strong>매매심리</strong>가 약한 상황에서 선취매 세력의 차익실현이 한꺼번에 나오는 것으로, 시장이 이미 선반영했다는 뜻이다."
+]},
+{h:"시장의 반응을 읽는 법", p:[
+"공시 자체보다 <strong>시장의 반응</strong>이 더 중요한 정보를 제공할 때가 있다. 호재 공시에도 주가가 하락한다면, 시장은 이미 선반영이 충분히 되었다고 판단하고 있는 것이다.",
+"공시 발표 → 초기 반응(30분~1시간) → <strong>수급의 변화</strong> 정리(1~3일) → 안정화 및 추세 형성(1~2주)의 사이클을 이해하라."
+]},
+{h:"📋 Case Study: 대형 수주인데 왜 주가가 빠졌을까?", p:[
+"<strong>[사례]</strong> 2024년 상반기, 국내 방산 기업 C사의 주가가 3개월간 80% 급등했다. 해외 수출 기대감으로 기관·외국인이 집중 매수하던 시기였다. 이후 실제로 '중동 국가 대상 5조 원 규모 수출 계약 체결'이라는 대형 수주 공시가 나왔다. 매출액 대비 40%에 달하는 역대급 규모였다.",
+"그러나 공시 당일, 주가는 시초가 5% 상승으로 출발했다가 장중 하락 반전하여 -3%로 마감했다. 다음 날도 -4% 추가 하락했다. 왜 이런 일이 벌어졌을까?",
+"첫째, <strong>선반영</strong>이 이미 완료되어 있었다. 3개월간 80% 상승은 시장이 이 수주를 기대하고 미리 반영한 결과였다. 실제 공시는 '확인'일 뿐 '새로운 정보'가 아니었다. 둘째, <strong>기대감 크기</strong>와 실제 공시의 차이가 크지 않았다. 시장은 7~8조 원 규모를 기대하고 있었는데 5조 원이 나온 것이다. 셋째, 선취매 세력의 대규모 차익실현이 집중되었다. 공시일 거래량은 평소의 5배였다.",
+"이 사례는 '호재 공시 = 매수'라는 등식이 성립하지 않는 이유를 보여준다. <strong>주가위치 분석</strong>을 통해 이미 얼마나 올랐는지, 시장의 기대치는 어느 수준인지를 먼저 파악해야 한다. 공시가 나오기 전에 이미 게임이 끝나 있는 경우가 생각보다 많다."
+]},
+], quote:"공시는 팩트이고, 주가는 시장의 해석이다. 선반영과 재료 소멸의 사이클을 활용하는 것이 시그널을 수익으로 바꾸는 첫 번째 관문이다.",
+table:{head:["상황","의미","대응 전략"], rows:[
+["호재 공시 + 급등","시장이 서프라이즈로 인식","추격 매수 자제, 눌림목 대기"],
+["호재 공시 + 하락","선반영 완료, 재료 소멸","보유 시 비중 축소 검토"],
+["악재 공시 + 급락","시장이 심각하게 인식","반등 매수 자제, 추가 악재 점검"],
+["공시 후 거래량 급증","참여자 간 의견 충돌","수급 방향(기관·외국인) 확인"]
+]}},
+
+// CH 5.2
+{id:"ch5-2", label:"제5장 · 5.2", title:"간명한 기업 가치 평가", sections:[
+{h:"상식적 몸값: 복잡한 모델 이전의 판단", p:[
+"'이 기업이 연간 500억 원의 영업이익을 내고 있는데, 시가총액이 2조 원이면 비싼가 싼가?' — 이런 상식적 질문에서 밸류에이션은 시작된다.",
+"<strong>시가총액 비교</strong>는 가장 직관적인 방법이다. 동일 업종에서 비슷한 <strong>현금창출능력</strong>과 <strong>이익성장률</strong>을 보이는 기업들의 <strong>비교그룹 분석</strong>을 통해 상대적 <strong>저평가 판단</strong>이 가능하다. PER, PBR, EV/EBITDA 같은 <strong>밸류에이션 멀티플</strong>을 비교하고, <strong>기대수익률</strong>이 충분한지 확인하라."
+]},
+{h:"증설 효과와 미래 실적 추정", p:[
+"공시 기반 밸류에이션의 가장 강력한 활용법은 <strong>증설효과 계산</strong>이다. 생산 능력 50% 확대 증설이면 <strong>미래실적 추정</strong>을 통해 완공 후 매출 최대 1,500억 원까지 추정하고, 영업이익률을 적용해 적정 시가총액을 계산한다.",
+"<strong>공시가치 환산</strong>, 즉 공시 정보를 기업 가치의 언어로 번역하여 <strong>적정시가총액</strong>을 산출하는 능력이 투자 성과를 좌우한다."
+]},
+{h:"안전마진: 틀려도 잃지 않는 가격", p:[
+"적정주가를 추정했다면, 그 가격의 70~80% 수준에서 매수하는 것이 <strong>안전마진</strong>을 확보하는 기본이다.",
+"<strong>청산가치</strong> — 기업이 보유한 <strong>자산가치</strong>를 모두 처분하고 부채를 갚았을 때 남는 가치 — 는 안전마진의 바닥을 설정해준다. 기업의 가치는 <strong>수익가치</strong>, <strong>시장점유율 가치</strong>, <strong>브랜드가치</strong>, <strong>무형자산 평가</strong>를 종합하여 판단해야 하며, 어느 하나에만 의존하면 왜곡된 결론에 이를 수 있다."
+]},
+], quote:"밸류에이션은 정밀한 계산보다 상식적 판단에서 시작된다. 공시에서 확인한 실적과 성장성을 기반으로 적정가치를 추정하고, 안전마진을 확보한 가격에서 진입하는 것이 팩트 기반 투자의 완성이다.",
+table:{head:["구분","긍정(+) 시그널","부정(-) 시그널"], rows:[
+["시가총액","동종 대비 저평가, 멀티플 할인","동종 대비 고평가, 프리미엄 과다"],
+["현금창출","FCF 흑자, 현금창출능력 우수","적자 지속, 현금 소진"],
+["성장성","증설 착공, 미래실적 가시적","성장 동력 부재, 정체"],
+["안전마진","청산가치 이상, 적정주가 대비 30%↓","적정가 이상 매수, 마진 없음"],
+["자산가치","유형·무형자산 우량, 브랜드 가치 확보","영업권 과다, 자산 부실"]
+]}},
+
+// CH 5.3
+{id:"ch5-3", label:"제5장 · 5.3", title:"매수와 매도의 골든타임", sections:[
+{h:"매수원칙: 확신이 있을 때만 들어가라", p:[
+"첫째, 공시 기반의 팩트가 펀더멘털 개선을 뒷받침하는가? 둘째, 안전마진이 있는가? 셋째, 수급이 극단적으로 부정적이지 않은가? 이 세 가지를 모두 만족하는 경우는 생각보다 드물다. 바로 그 '드문 기회'에만 집중하는 것이 <strong>원칙준수</strong>이자 <strong>매매의 정석</strong>이며, 흔들리지 않는 <strong>마인드셋</strong>의 출발점이다."
+]},
+{h:"분할매수와 손절선", p:[
+"<strong>분할매수</strong>는 리스크를 통제하는 가장 현실적인 기법이다. 첫 매수에 계획 물량의 30~40%만 투입하고, 시장의 반응과 추가 정보를 확인한 뒤 나머지를 투입한다.",
+"<strong>손절선</strong>은 감정이 아닌 논리로 설정하여 <strong>퇴로를 확보</strong>한다. 기대 수익이 20%이고 손절선이 -7%라면, <strong>손익비</strong>는 약 3:1이다. <strong>승률계산</strong>에서 30%만 되어도 기대값은 플러스다. 이것이 <strong>리스크관리</strong>의 수학이다."
+]},
+{h:"호재의 연속성과 악재의 성격", p:[
+"호재 공시가 이어진다면 <strong>비중조절</strong>을 통해 확대하고, <strong>추적관찰</strong>로 <strong>시장의 흐름</strong>을 읽으며 <strong>기업과 동행</strong>하라. 일회성에 그치면 주가가 원래 수준으로 회귀할 가능성이 높다.",
+"일시적 악재(일회성 비용)와 구조적 악재(경쟁력 상실)는 완전히 다른 대응을 요구한다. 구조적 악재 앞에서는 빠른 <strong>포트폴리오조정</strong>과 손절이 최선이며, 이것이 <strong>최종결단</strong>의 순간이다."
+]},
+{h:"매매일지: 확증편향을 경계하라", p:[
+"<strong>매매일지</strong>에 매수 근거, 매수 가격, 손절선, 목표가, 그리고 보유 기간 중의 판단 기록을 남겨라. <strong>확증편향</strong> — 내가 원하는 정보만 골라 보는 함정 — 을 방지하는 가장 좋은 방법이다."
+]},
+], quote:"매수에는 원칙이, 매도에는 논리가 필요하다. 분할매수로 리스크를 관리하고, 손절선으로 퇴로를 확보하며, 매매일지로 자기 자신을 객관화하라.",
+table:{head:["구분","원칙을 지킨 매매 (+)","원칙 없는 매매 (-)"], rows:[
+["매수","분할매수, 안전마진 확보 후 진입","몰빵 매수, 추격 매수"],
+["손절","손절선 사전 설정, 손익비 3:1 이상","감정적 버티기, 물타기"],
+["비중조절","호재 연속 시 확대, 악재 시 축소","확증편향에 빠져 올인"],
+["매매일지","근거·가격·결과 기록, 복기","기록 없이 감으로 매매"],
+["최종결단","구조적 악재 시 빠른 포트폴리오 조정","손실 회피 심리로 방치"]
+]}},
+
+// CH 5.4
+{id:"ch5-4", label:"제5장 · 5.4", title:"최종 체크리스트와 투자 철학", sections:[
+{h:"5단계 질문: 투자 전 반드시 거쳐야 할 관문", p:[
+"<strong>1단계 — 팩트 검증</strong>: 내가 알고 있는 정보는 DART 공시로 확인된 팩트인가?<br><strong>2단계 — 본질 가치</strong>: 비즈니스 모델, 재무 건전성, 경영진의 신뢰도를 확인했는가?<br><strong>3단계 — 시그널 판별</strong>: 표면이 아닌 이면까지 분석했는가?<br><strong>4단계 — 가격 판단</strong>: 안전마진이 있는가? 선반영된 것은 아닌가?<br><strong>5단계 — 리스크 통제</strong>: 손절선을 설정했는가? 포트폴리오가 위험해지지 않는가?"
+]},
+{h:"팩트 체크리스트: 감정을 배제하는 도구", p:[
+"<strong>팩트 체크리스트</strong>는 <strong>감정배제</strong>를 위한 가장 강력한 도구다. 매수 전에 체크리스트의 모든 항목을 확인하지 않으면 매수하지 않는다는 규칙을 만들면, 충동적 매수를 크게 줄일 수 있다. 체크리스트가 없는 투자자는 매번 다른 기준으로 의사결정을 내리게 된다. 매수 이후에도 <strong>가설검증</strong>을 지속하여, 당초 전제가 무너졌다면 <strong>수익확정</strong>이든 손절이든 빠르게 행동하는 것이 <strong>데이터중심 투자</strong>의 핵심이다."
+]},
+{h:"투자노트와 복리의 마법", p:[
+"<strong>투자노트</strong>에 '왜 이 종목을 샀는가?'를 기록하면, 나중에 '왜 돈을 벌었는가' 또는 '왜 잃었는가'를 정확히 복기할 수 있다. 이것이 <strong>기록의 힘</strong>이며, 이 축적이 <strong>투자자의 성장</strong>을 만들어낸다.",
+"연 15%의 수익을 10년간 유지하면 원금은 4배가 된다. 이것이 <strong>복리의 마법</strong>이다. 이런 수익률은 화려한 트레이딩이 아니라, <strong>장기투자</strong>의 관점에서 <strong>지속 가능한 수익</strong>을 꾸준히 만들어내는 체계에서 나온다. <strong>인내심</strong>과 <strong>독립적 사고</strong>가 이 체계의 근간이다."
+]},
+{h:"흔들리지 않는 기준: 자신만의 시스템", p:[
+"성공하는 투자자와 그렇지 못한 투자자의 차이는 <strong>흔들리지 않는 기준</strong>, 즉 <strong>자신만의 시스템</strong> 유무에 있다. 시스템이란 '어떤 공시를 볼 것인가 → 어떻게 분석할 것인가 → 어떤 조건에서 사고 팔 것인가'의 프로세스가 일관되게 작동하는 것이다. 이것이 <strong>가치투자의 본질</strong>이며, <strong>성공투자의 확신</strong>은 바로 이 시스템에 대한 신뢰에서 비롯된다.",
+"아무리 치밀하게 분석해도 시장이 다르게 움직일 수 있다. 틀릴 수 있다는 것을 인정하는 <strong>시장의 겸손</strong>이 원금보호의 출발점이다."
+]},
+], quote:"성공하는 투자자는 '자기만의 시스템'을 가진 투자자다. 5단계 체크리스트를 일관되게 적용하고, 투자노트로 기록하며, 가설을 검증하는 사이클을 반복하라.",
+table:{head:["단계","질문","확인 출처"], rows:[
+["1. 팩트","DART 공시로 확인된 정보인가?","공시검색, 사업보고서"],
+["2. 본질","비즈니스 모델과 재무 체력은?","사업보고서 분석"],
+["3. 시그널","어떤 시그널을 주고 있는가?","시그널 판별 프레임"],
+["4. 가격","안전마진이 있는 가격인가?","밸류에이션 분석"],
+["5. 리스크","손절선·비중이 통제되는가?","매매 원칙"]
+]}},
+];
+
+// === EPILOGUE (separate) ===
+const epilogueData = {
+  id: "epilogue",
+  label: "Epilogue",
+  title: "공시 기반 투자 시스템의 구축",
+  paragraphs: [
+    "이 책에서 다룬 내용을 정리하면 하나의 프로세스로 수렴한다. <strong>공시 확인 → 팩트 검증 → 시그널 판별 → 가치 평가 → 매매 결정</strong>. 이 흐름이 일관되게 작동하는 것이 곧 투자 시스템이다.",
+    "사업보고서의 매출채권 회전일수, CB의 리픽싱 조건, 감사의견의 강조사항, 수주잔고의 추세 — 이 책에서 다룬 분석 항목들은 개별적으로도 유용하지만, 하나의 체크리스트로 결합될 때 가장 강력한 효과를 발휘한다.",
+    "현실적인 한계도 인식해야 한다. 매일 DART에 올라오는 800건 이상의 공시를 개인투자자가 모두 확인하는 것은 불가능하다. 기관투자자와의 마지막 격차는 분석 능력이 아니라 모니터링의 체계성이다.",
+    "이 격차를 좁힐 수 있는 도구는 이미 존재한다. DART Open API를 활용한 자동 모니터링, AI 기반의 공시 요약과 스코어링, 실시간 알림 시스템 등이 개인투자자의 정보력을 기관 수준으로 끌어올리고 있다. 다만 도구가 분석을 도울 수는 있어도, <strong>최종 판단의 책임은 투자자 자신에게 있다</strong>.",
+    "이 책의 프레임워크를 적용하는 첫 단계는 단순하다. DART에서 관심 종목 하나의 사업보고서를 열고, 4장의 5단계 체크리스트를 순서대로 적용해보라. 처음에는 시간이 걸리지만, 3~5회 반복하면 핵심 항목을 빠르게 포착하는 패턴이 형성된다.",
+    "마지막으로 한 가지. 아무리 치밀한 분석 시스템을 갖추더라도 시장이 다르게 움직이는 경우는 반드시 발생한다. 분석이 틀릴 수 있다는 전제하에 손절선을 설정하고, 포트폴리오 비중을 통제하는 것이 시스템의 일부다. 팩트 기반 투자의 핵심은 '항상 맞추는 것'이 아니라, <strong>틀렸을 때의 손실을 통제하면서 맞았을 때의 수익을 극대화하는 구조</strong>를 만드는 것이다."
+  ]
+};
+
+// === RENDER ===
+function renderChapters() {
+  const container = document.getElementById('chapters-container');
+  let html = '';
+
+  chapters.forEach(ch => {
+    html += `<section class="chapter" id="${ch.id}">`;
+    html += `<div class="chapter-label">${ch.label}</div>`;
+    html += `<h2>${ch.title}</h2>`;
+
+    ch.sections.forEach(s => {
+      html += `<h3>${s.h}</h3>`;
+      s.p.forEach(p => { html += `<p>${p}</p>`; });
+    });
+
+    if (ch.table) {
+      html += '<h4>📊 시그널 대조표</h4><div class="table-wrap"><table><thead><tr>';
+      ch.table.head.forEach(h => { html += `<th>${h}</th>`; });
+      html += '</tr></thead><tbody>';
+      ch.table.rows.forEach(r => {
+        html += '<tr>';
+        r.forEach(c => { html += `<td>${c}</td>`; });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+
+    if (ch.quote) {
+      html += `<blockquote><strong>핵심 메시지</strong>: ${ch.quote}</blockquote>`;
+    }
+
+    html += '</section>';
+  });
+
+  // Epilogue
+  html += `<section class="chapter" id="${epilogueData.id}">`;
+  html += `<div class="chapter-label">${epilogueData.label}</div>`;
+  html += `<h2>${epilogueData.title}</h2><hr>`;
+  epilogueData.paragraphs.forEach(p => { html += `<p>${p}</p>`; });
+  html += `<hr><p style="text-align:center;color:var(--text-light);font-size:0.9rem;margin-top:2rem">본 가이드북의 내용에 대한 피드백은 언제든 환영합니다.<br>본 자료는 투자 교육 목적이며, 특정 종목에 대한 매수·매도 추천이 아닙니다.</p>`;
+  html += '</section>';
+
+  container.innerHTML = html;
+}
+
+// === INTERACTIONS ===
+function toggleMenu() {
+  document.body.classList.toggle('menu-open');
+}
+
+// Close sidebar on nav click (mobile)
+document.querySelectorAll('.sidebar a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 960) document.body.classList.remove('menu-open');
+  });
+});
+
+// Progress bar
+function updateProgress() {
+  const winH = window.innerHeight;
+  const docH = document.documentElement.scrollHeight - winH;
+  const scrolled = window.scrollY;
+  document.getElementById('progressFill').style.width = Math.min((scrolled / docH) * 100, 100) + '%';
+
+  // Back to top
+  const btn = document.getElementById('backToTop');
+  btn.classList.toggle('visible', scrolled > 600);
+}
+
+// Active nav
+function updateActiveNav() {
+  const sections = document.querySelectorAll('.chapter, .cover');
+  const links = document.querySelectorAll('.sidebar a');
+  let current = '';
+
+  sections.forEach(s => {
+    const top = s.offsetTop - 120;
+    if (window.scrollY >= top) current = s.id;
+  });
+
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
+window.addEventListener('scroll', () => {
+  updateProgress();
+  updateActiveNav();
+}, { passive: true });
+
+// Init
+renderChapters();
+updateProgress();
+</script>
+</body>
+</html>
