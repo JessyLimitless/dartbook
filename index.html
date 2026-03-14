@@ -45,18 +45,24 @@ body.reading #pct{opacity:1}
 
 /* ═══════ SIDEBAR ═══════ */
 #sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--sidebar-bg);overflow-y:auto;overflow-x:hidden;z-index:100;padding:0 0 48px;transition:transform .3s cubic-bezier(.4,0,.2,1);border-right:1px solid var(--border)}
-.sb-head{padding:28px 22px 20px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.6) 0%,var(--sidebar-bg) 100%);position:sticky;top:0;z-index:2;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.sb-head h2{font-family:var(--serif);font-size:.76rem;font-weight:700;color:var(--sidebar-hi);line-height:1.5;letter-spacing:.01em}
-.sb-head .sub{font-family:var(--sans);font-size:.55rem;color:var(--text3);margin-top:5px;letter-spacing:.08em;text-transform:uppercase}
-#toc{padding:14px 10px 0}
-#toc a{display:block;text-decoration:none;padding:7px 12px;font-family:var(--sans);font-size:.72rem;color:var(--sidebar-tx);border-radius:7px;transition:all .18s ease;line-height:1.5;border-left:2px solid transparent;letter-spacing:.005em;margin-bottom:1px;position:relative}
-#toc a:hover{background:rgba(232,85,109,.06);color:var(--text);border-left-color:rgba(232,85,109,.2)}
-#toc a.active{background:rgba(232,85,109,.08);color:var(--sidebar-hi);font-weight:600;border-left-color:var(--sidebar-hi)}
-#toc a.active::before{content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);width:4px;height:4px;border-radius:50%;background:var(--sidebar-hi);box-shadow:0 0 6px rgba(232,85,109,.4)}
-.toc-part{font-family:var(--sans)!important;font-weight:700!important;font-size:.6rem!important;color:var(--text3)!important;margin-top:20px!important;padding:14px 12px 6px!important;border-top:1px solid var(--border)!important;letter-spacing:.1em;text-transform:uppercase;border-left:none!important;cursor:default}
-.toc-part:first-child{border-top:none!important;margin-top:4px!important}
+.sb-head{padding:24px 20px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.7) 0%,var(--sidebar-bg) 100%);position:sticky;top:0;z-index:2;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sb-head h2{font-family:var(--serif);font-size:.82rem;font-weight:700;color:var(--sidebar-hi);line-height:1.4;letter-spacing:.01em}
+.sb-head .sub{font-family:var(--sans);font-size:.58rem;color:var(--text3);margin-top:4px;letter-spacing:.06em}
+#toc{padding:12px 8px 0}
+/* 프롤로그/에필로그 특수 링크 */
+#toc .toc-special{display:block;text-decoration:none;padding:8px 14px;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--accent);border-radius:8px;transition:all .18s ease;line-height:1.5;letter-spacing:.01em;margin-bottom:2px;font-style:italic}
+#toc .toc-special:hover{background:rgba(232,85,109,.06);color:var(--sidebar-hi)}
+#toc .toc-special.active{background:rgba(232,85,109,.1);color:var(--sidebar-hi);font-weight:600}
+/* 장 구분 헤더 */
+.toc-part{display:block;font-family:var(--sans);font-weight:700;font-size:.68rem;color:var(--text2);margin-top:18px;padding:12px 14px 6px;border-top:1px solid var(--border);letter-spacing:.04em;cursor:default}
+.toc-part:first-child{border-top:none;margin-top:8px}
+/* 섹션 링크 */
+#toc .toc-section{display:block;text-decoration:none;padding:6px 14px 6px 26px;font-family:var(--sans);font-size:.76rem;color:var(--sidebar-tx);border-radius:6px;transition:all .18s ease;line-height:1.55;border-left:2px solid transparent;letter-spacing:.005em;margin-bottom:1px;position:relative;word-break:keep-all}
+#toc .toc-section:hover{background:rgba(232,85,109,.05);color:var(--text);border-left-color:rgba(232,85,109,.25)}
+#toc .toc-section.active{background:rgba(232,85,109,.08);color:var(--sidebar-hi);font-weight:600;border-left-color:var(--sidebar-hi)}
+#toc .toc-section.active::before{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:4px;height:4px;border-radius:50%;background:var(--sidebar-hi);box-shadow:0 0 6px rgba(232,85,109,.4)}
 #sidebar::-webkit-scrollbar{width:3px}
-#sidebar::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:3px}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
 #sidebar::-webkit-scrollbar-track{background:transparent}
 
 /* ═══════ MAIN + PAGE CARD ═══════ */
@@ -798,29 +804,32 @@ function renderChapters() {
 // === TOC BUILD ===
 function buildTOC() {
   const toc = document.getElementById('toc');
-  let html = '<a href="#prologue" data-id="prologue">프롤로그</a>';
+  let html = '<a href="#prologue" data-id="prologue" class="toc-special">프롤로그</a>';
   const chapterMap = {};
+  const chapterTitles = {
+    '1': '제1장 &mdash; 투자자의 첫 번째 도구',
+    '2': '제2장 &mdash; 놓치고 있는 기회',
+    '3': '제3장 &mdash; 실전 가이드',
+    '4': '제4장 &mdash; 투자 판단'
+  };
   chapters.forEach(ch => {
     const m = ch.label.match(/제(\d)장/);
     if (m) {
       const cn = m[1];
       if (!chapterMap[cn]) {
-        const titles = {
-          '1': '제1장 — 투자자의 첫 번째 도구',
-          '2': '제2장 — 놓치고 있는 기회',
-          '3': '제3장 — 실전 가이드',
-          '4': '제4장 — 투자 판단'
-        };
         chapterMap[cn] = true;
-        html += '<div class="toc-part">' + (titles[cn]||'') + '</div>';
+        html += '<div class="toc-part">' + (chapterTitles[cn]||'') + '</div>';
       }
     }
     if (ch.id === 'appendix') {
       html += '<div class="toc-part">부록</div>';
     }
-    html += '<a href="#' + ch.id + '" data-id="' + ch.id + '">' + ch.title + '</a>';
+    // 섹션 번호 추출 (예: "제1장 · 1.1" → "1.1")
+    const numMatch = ch.label.match(/(\d+\.\d+)/);
+    const numLabel = numMatch ? '<span style="color:var(--accent);font-weight:600;margin-right:6px">' + numMatch[1] + '</span>' : '';
+    html += '<a href="#' + ch.id + '" data-id="' + ch.id + '" class="toc-section">' + numLabel + ch.title + '</a>';
   });
-  html += '<a href="#epilogue" data-id="epilogue">에필로그</a>';
+  html += '<a href="#epilogue" data-id="epilogue" class="toc-special" style="margin-top:12px">에필로그</a>';
   toc.innerHTML = html;
 }
 
