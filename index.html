@@ -4,692 +4,208 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>전자공시 시그널 — 공시로 읽는 투자의 기술</title>
+<meta name="description" content="DART 공시 데이터를 기반으로 투자 의사결정을 내리는 실전 가이드북. 초보자도 공시를 읽고 투자 판단을 내릴 수 있도록 친절하게 안내합니다.">
+<meta property="og:type" content="book">
+<meta property="og:title" content="전자공시 시그널 — 공시로 읽는 투자의 기술">
+<meta property="og:description" content="DART 공시 데이터 기반 실전 투자 의사결정 가이드북">
+<meta property="og:locale" content="ko_KR">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ═══════ DESIGN TOKENS ═══════ */
 :root {
-  --bg: #FAF8F5;
-  --bg-sidebar: #F0EDE6;
-  --bg-card: #FFFFFF;
-  --text: #1A1A1A;
-  --text-secondary: #555555;
-  --text-light: #8C8C8C;
-  --accent: #9E7A2F;
-  --accent-light: #C4A24D;
-  --accent-bg: #F9F5ED;
-  --border: #DDD7CA;
-  --border-light: #EBE7DE;
-  --green: #1B6B3A;
-  --green-bg: #EEF6F0;
-  --red: #A82020;
-  --red-bg: #FDF2F2;
-  --shadow: 0 1px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 2px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
-  --chapter-width: 720px;
-  --serif: 'Noto Serif KR', 'Batang', Georgia, serif;
-  --sans: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
-  --display: 'Playfair Display', var(--serif);
-  --transition: cubic-bezier(0.4, 0, 0.2, 1);
+  --bg:#f0f4f8;--page:#ffffff;--page-edge:rgba(30,60,100,.05);
+  --sidebar-bg:#15202e;--sidebar-tx:#94adc8;--sidebar-hi:#e8b84b;
+  --text:#1b2838;--text2:#47596e;--text3:#8d9bac;
+  --accent:#c49a2a;--accent2:#e8b84b;--accent-bg:rgba(196,154,42,.045);
+  --border:#dce4ed;--quote-bg:#f4f8fc;--tbl-head:#edf2f8;--tbl-alt:#f8fafc;
+  --green:#1B6B3A;--green-bg:#EEF6F0;--red:#A82020;--red-bg:#FDF2F2;
+  --sidebar-w:264px;--page-w:720px;--page-px:60px;--page-py:68px;
+  --serif:'Noto Serif KR','Batang',Georgia,serif;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+}
+[data-theme="dark"] {
+  --bg:#0c1018;--page:#151c28;--page-edge:rgba(200,160,40,.03);
+  --sidebar-bg:#0a0e15;--sidebar-tx:#5c7a9a;--sidebar-hi:#e8b84b;
+  --text:#c8d4e2;--text2:#8298b0;--text3:#4a5e72;
+  --accent:#e8b84b;--accent2:#f0cc6a;--accent-bg:rgba(232,184,75,.06);
+  --border:#1e2a3a;--quote-bg:#121822;--tbl-head:#182030;--tbl-alt:#131a24;
+  --green:#4CAF50;--green-bg:#1a2a1e;--red:#ef5350;--red-bg:#2a1a1a;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16.5px;-webkit-text-size-adjust:100%}
+body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.95;letter-spacing:-.005em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;transition:background .4s,color .4s;overflow-x:hidden}
 
-html { scroll-behavior: smooth; font-size: 17px; }
+/* ═══════ PROGRESS ═══════ */
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:999;transition:width .15s ease-out;border-radius:0 1px 1px 0}
+#pct{position:fixed;top:6px;right:18px;font-size:.6rem;font-family:var(--sans);color:var(--text3);z-index:999;opacity:0;transition:opacity .3s;font-variant-numeric:tabular-nums;letter-spacing:.04em;font-weight:500}
+body.reading #pct{opacity:1}
 
-body {
-  font-family: var(--serif);
-  color: var(--text);
-  background: var(--bg);
-  line-height: 1.9;
-  letter-spacing: -0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+/* ═══════ SIDEBAR ═══════ */
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--sidebar-bg);overflow-y:auto;overflow-x:hidden;z-index:100;padding:0 0 48px;transition:transform .3s cubic-bezier(.4,0,.2,1);border-right:1px solid rgba(255,255,255,.04)}
+.sb-head{padding:28px 22px 20px;border-bottom:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,transparent 100%);position:sticky;top:0;z-index:2;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sb-head h2{font-family:var(--serif);font-size:.76rem;font-weight:700;color:var(--sidebar-hi);line-height:1.5;letter-spacing:.01em}
+.sb-head .sub{font-family:var(--sans);font-size:.55rem;color:rgba(255,255,255,.2);margin-top:5px;letter-spacing:.08em;text-transform:uppercase}
+#toc{padding:14px 10px 0}
+#toc a{display:block;text-decoration:none;padding:7px 12px;font-family:var(--sans);font-size:.72rem;color:var(--sidebar-tx);border-radius:7px;transition:all .18s ease;line-height:1.5;border-left:2px solid transparent;letter-spacing:.005em;margin-bottom:1px;position:relative}
+#toc a:hover{background:rgba(255,255,255,.05);color:#d0dcea;border-left-color:rgba(255,255,255,.15)}
+#toc a.active{background:rgba(232,184,75,.1);color:var(--sidebar-hi);font-weight:600;border-left-color:var(--sidebar-hi)}
+#toc a.active::before{content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);width:4px;height:4px;border-radius:50%;background:var(--sidebar-hi);box-shadow:0 0 6px var(--sidebar-hi)}
+.toc-part{font-family:var(--sans)!important;font-weight:700!important;font-size:.6rem!important;color:rgba(255,255,255,.3)!important;margin-top:20px!important;padding:14px 12px 6px!important;border-top:1px solid rgba(255,255,255,.04)!important;letter-spacing:.1em;text-transform:uppercase;border-left:none!important;cursor:default}
+.toc-part:first-child{border-top:none!important;margin-top:4px!important}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.06);border-radius:3px}
+#sidebar::-webkit-scrollbar-track{background:transparent}
+
+/* ═══════ MAIN + PAGE CARD ═══════ */
+#main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;justify-content:center;padding:48px 28px 72px;transition:margin-left .3s}
+.page{width:100%;max-width:var(--page-w);background:var(--page);box-shadow:0 0 0 1px var(--page-edge),0 4px 16px rgba(30,60,100,.04),0 16px 48px rgba(30,60,100,.06);border-radius:4px;padding:var(--page-py) var(--page-px);min-height:100vh;transition:background .4s,box-shadow .4s}
+
+/* ═══════ COVER ═══════ */
+.cover{text-align:center;margin-bottom:64px;position:relative;background:#1a3a52;border-radius:12px;overflow:hidden}
+.cover-inner{display:flex;flex-direction:column;align-items:center;padding:64px 32px 56px;position:relative;z-index:1}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 45%,rgba(196,154,42,.08) 0%,transparent 70%),linear-gradient(180deg,#1a3a52 0%,#142e44 100%);z-index:0}
+.cover-badge{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.2em;color:#e8b84b;padding:6px 18px;border:1.5px solid rgba(232,184,75,.5);border-radius:20px;margin-bottom:24px;opacity:.9}
+.cover-line{width:40px;height:2px;background:linear-gradient(90deg,#c49a2a,#e8b84b);border-radius:1px;margin:20px 0;opacity:.6}
+.cover-title{font-size:2rem;font-weight:900;line-height:1.4;letter-spacing:-.02em;color:#fff;max-width:480px;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+.cover-title em{font-style:italic;color:#e8b84b}
+.cover-subtitle{font-family:var(--sans);font-size:.82rem;color:#e8b84b;line-height:1.7;letter-spacing:.01em;margin-top:8px;font-weight:500}
+.cover-meta{font-family:var(--sans);font-size:.7rem;font-weight:500;color:rgba(255,255,255,.5);letter-spacing:.04em;margin-top:4px}
+
+/* ═══════ CHAPTER ═══════ */
+.chapter{margin-top:72px}
+.chapter:first-child{margin-top:0}
+.chapter-label{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.chapter h2{font-size:1.5rem;font-weight:700;line-height:1.4;padding-bottom:16px;letter-spacing:-.015em;border-bottom:2px solid var(--accent);margin-bottom:32px}
+.chapter h3{font-size:1.08rem;font-weight:600;line-height:1.5;margin:56px 0 24px;padding-left:16px;letter-spacing:-.01em;border-left:3px solid var(--accent);color:var(--text)}
+.chapter h3:first-of-type{margin-top:0}
+.chapter h4{font-family:var(--sans);font-size:.85rem;font-weight:700;color:var(--accent);margin:32px 0 16px;letter-spacing:.02em}
+.chapter p{margin-bottom:20px;text-align:justify;word-break:keep-all;overflow-wrap:break-word;font-size:.97rem;line-height:2;letter-spacing:-.003em}
+.chapter strong{font-weight:700;color:var(--text)}
+.chapter hr{border:none;height:1px;background:var(--border);margin:48px auto;max-width:120px}
+.chapter h3 + p::first-letter{font-size:2.4em;float:left;line-height:.82;margin:6px 10px 0 0;font-weight:900;color:var(--accent);letter-spacing:0}
+
+/* ═══════ BLOCKQUOTE ═══════ */
+.chapter blockquote{background:var(--quote-bg);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:24px 30px;margin:32px 0;position:relative;box-shadow:0 2px 8px rgba(30,60,100,.03);font-size:.93rem;line-height:1.95}
+.chapter blockquote::before{content:'\201C';font-size:2.6rem;line-height:1;color:var(--accent);opacity:.18;position:absolute;top:10px;left:14px;font-family:Georgia,serif}
+.chapter blockquote strong{color:var(--accent)}
+
+/* ═══════ TABLE ═══════ */
+.table-wrap{overflow-x:auto;margin:28px 0;border-radius:10px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(30,60,100,.03)}
+.chapter table{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:.8rem;letter-spacing:.005em}
+.chapter thead{background:var(--tbl-head)}
+.chapter th{padding:11px 16px;text-align:left;font-weight:600;font-size:.74rem;border-bottom:2px solid var(--border);white-space:nowrap;color:var(--text);letter-spacing:.02em}
+.chapter td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6}
+.chapter tbody tr:nth-child(even){background:var(--tbl-alt)}
+.chapter tbody tr:hover{background:var(--accent-bg)}
+.chapter td:nth-child(2){color:var(--green);font-weight:500}
+.chapter td:nth-child(3){color:var(--red);font-weight:500}
+
+/* ═══════ CALLOUTS ═══════ */
+.danger-callout{margin:2rem 0;padding:1.25rem 1.5rem;background:var(--red-bg);border-left:3px solid var(--red);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:.88rem;line-height:1.75;color:var(--text)}
+.danger-callout::before{content:'\26A0  주의';display:block;font-weight:700;color:var(--red);font-size:.75rem;letter-spacing:.08em;margin-bottom:.5rem}
+.danger-callout strong{color:var(--red)}
+.tip-callout{margin:2rem 0;padding:1.25rem 1.5rem;background:var(--green-bg);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:.88rem;line-height:1.75;color:var(--text)}
+.tip-callout::before{content:'\1F4A1  실전 팁';display:block;font-weight:700;color:var(--green);font-size:.75rem;letter-spacing:.08em;margin-bottom:.5rem}
+.tip-callout strong{color:var(--green)}
+.author-note{margin:2rem 0;padding:1.5rem 1.75rem;background:var(--accent-bg);border-radius:10px;font-family:var(--sans);font-size:.85rem;line-height:1.75;color:var(--text2)}
+.author-note::before{content:'\270D  저자의 한마디';display:block;font-weight:700;color:var(--accent);font-size:.72rem;letter-spacing:.1em;margin-bottom:.5rem}
+
+/* ═══════ FOOTER ═══════ */
+.book-footer{text-align:center;padding:56px 0 0;margin-top:72px;border-top:1px solid var(--border);font-family:var(--sans);font-size:.75rem;color:var(--text3);letter-spacing:.02em}
+
+/* ═══════ FLOATING BUTTONS ═══════ */
+#theme-btn,#top-btn{position:fixed;z-index:200;border-radius:50%;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s ease;background:var(--page);color:var(--text2);box-shadow:0 2px 12px rgba(30,60,100,.08);backdrop-filter:blur(8px)}
+#theme-btn{bottom:28px;right:28px;width:42px;height:42px;font-size:1.05rem}
+#top-btn{bottom:80px;right:28px;width:38px;height:38px;font-size:.95rem;display:none;color:var(--text3)}
+#theme-btn:hover,#top-btn:hover{transform:scale(1.1);box-shadow:0 4px 16px rgba(30,60,100,.12)}
+#top-btn:hover{color:var(--accent)}
+#menu-btn{display:none;position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--page);color:var(--text2);font-size:1.2rem;cursor:pointer;box-shadow:0 2px 10px rgba(30,60,100,.08);align-items:center;justify-content:center;backdrop-filter:blur(8px);transition:all .2s}
+#menu-btn:hover{color:var(--accent)}
+#overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,20,35,.55);z-index:90;backdrop-filter:blur(2px)}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:1000px){:root{--page-px:44px;--page-py:52px}}
+@media(max-width:900px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0);box-shadow:4px 0 32px rgba(10,20,35,.35)}
+  #main{margin-left:0;padding:24px 14px 48px}
+  #menu-btn{display:flex}
+  :root{--page-px:28px;--page-py:44px}
+  .cover-inner{padding:48px 24px 40px}.cover-title{font-size:1.5rem}
+  .chapter h2{font-size:1.25rem}.chapter h3{font-size:.95rem}
+  table{font-size:.75rem}th,td{padding:8px 12px}
+  .chapter p{font-size:.93rem;line-height:1.9}
 }
-
-/* === SIDEBAR NAV === */
-.sidebar {
-  position: fixed; top: 0; left: 0;
-  width: 280px; height: 100vh;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  z-index: 100;
-  padding: 2.5rem 0;
-  transition: transform 0.4s var(--transition);
+@media(max-width:500px){
+  html{font-size:15px}:root{--page-px:22px;--page-py:36px}
+  .cover-inner{padding:36px 16px 28px}.cover-title{font-size:1.25rem}
+  .chapter blockquote{padding:18px 18px 18px 20px}
+  .chapter h3 + p::first-letter{font-size:2em}.chapter p{line-height:1.85}
 }
-
-.sidebar-header {
-  padding: 0 1.75rem 1.75rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1.25rem;
+@media print{
+  #sidebar,#menu-btn,#theme-btn,#top-btn,#progress,#pct,#overlay{display:none!important}
+  #main{margin-left:0;padding:0}.page{box-shadow:none;max-width:100%;padding:0}
+  .chapter{page-break-before:always}body{font-size:11pt;line-height:1.8}
 }
-
-.sidebar-header .book-icon {
-  font-size: 1.1rem;
-  color: var(--accent);
-  letter-spacing: 0.08em;
-  font-family: var(--sans);
-  font-weight: 700;
-}
-
-.sidebar-header .book-subtitle {
-  font-size: 0.7rem;
-  color: var(--text-light);
-  font-family: var(--sans);
-  margin-top: 0.35rem;
-  letter-spacing: 0.04em;
-}
-
-.sidebar nav { padding: 0 0.875rem; }
-
-.sidebar .nav-chapter {
-  font-family: var(--sans);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  padding: 1.25rem 0.75rem 0.4rem;
-  margin-top: 0.25rem;
-}
-
-.sidebar a {
-  display: block;
-  padding: 0.5rem 0.875rem;
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: 6px;
-  transition: all 0.25s var(--transition);
-  line-height: 1.55;
-  letter-spacing: 0.01em;
-}
-
-.sidebar a:hover { background: rgba(158,122,47,0.07); color: var(--text); }
-.sidebar a.active {
-  background: var(--accent-bg);
-  color: var(--accent);
-  font-weight: 500;
-  box-shadow: inset 2px 0 0 var(--accent);
-  border-radius: 0 6px 6px 0;
-}
-
-.sidebar a.nav-special {
-  color: var(--accent);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: 0.02em;
-}
-
-/* === MOBILE MENU === */
-.menu-toggle {
-  display: none;
-  position: fixed; top: 1rem; left: 1rem;
-  z-index: 200;
-  width: 44px; height: 44px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  cursor: pointer;
-  align-items: center; justify-content: center;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.2s;
-}
-
-.menu-toggle:active { transform: scale(0.92); }
-
-.menu-toggle span {
-  display: block; width: 18px; height: 2px;
-  background: var(--text);
-  position: relative;
-  transition: all 0.3s;
-}
-
-.menu-toggle span::before, .menu-toggle span::after {
-  content: ''; position: absolute; left: 0;
-  width: 18px; height: 2px; background: var(--text);
-  transition: all 0.3s;
-}
-.menu-toggle span::before { top: -6px; }
-.menu-toggle span::after { top: 6px; }
-
-.menu-open .menu-toggle span { background: transparent; }
-.menu-open .menu-toggle span::before { top: 0; transform: rotate(45deg); }
-.menu-open .menu-toggle span::after { top: 0; transform: rotate(-45deg); }
-
-.overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.3);
-  z-index: 90;
-  opacity: 0; transition: opacity 0.3s;
-}
-
-.menu-open .overlay { display: block; opacity: 1; }
-
-/* === MAIN CONTENT === */
-.main {
-  margin-left: 280px;
-  min-height: 100vh;
-}
-
-/* === COVER === */
-.cover {
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(170deg, #FAF8F5 0%, #F2EDE2 40%, #E8E0D0 100%);
-  position: relative;
-  overflow: hidden;
-  padding: 3rem 2rem;
-}
-
-.cover::before {
-  content: '';
-  position: absolute; top: -20%; right: -5%;
-  width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(158,122,47,0.05) 0%, transparent 65%);
-  border-radius: 50%;
-  animation: gentlePulse 8s ease-in-out infinite;
-}
-
-@keyframes gentlePulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-}
-
-.cover::after {
-  content: '';
-  position: absolute; bottom: 0; left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-}
-
-.cover-content {
-  text-align: center;
-  max-width: 560px;
-  animation: fadeUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.cover-badge {
-  font-family: var(--sans);
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 2.5rem;
-  display: inline-block;
-  padding: 0.5rem 1.5rem;
-  border: 1px solid rgba(158,122,47,0.4);
-  border-radius: 2rem;
-}
-
-.cover h1 {
-  font-family: var(--serif);
-  font-size: 2.8rem;
-  font-weight: 900;
-  line-height: 1.3;
-  color: var(--text);
-  margin-bottom: 0.6rem;
-  letter-spacing: -0.02em;
-}
-
-.cover h1 em {
-  font-family: var(--display);
-  font-style: italic;
-  color: var(--accent);
-}
-
-.cover .subtitle {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  margin-bottom: 2.5rem;
-  font-weight: 400;
-  letter-spacing: 0.03em;
-}
-
-.cover .author {
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  color: var(--text-light);
-  letter-spacing: 0.12em;
-}
-
-.cover .divider-line {
-  width: 48px; height: 1.5px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  margin: 1.75rem auto;
-}
-
-/* === CHAPTER SECTIONS === */
-.chapter {
-  max-width: var(--chapter-width);
-  margin: 0 auto;
-  padding: 5rem 2rem 5.5rem;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.chapter:last-child { border-bottom: none; }
-
-.chapter-label {
-  font-family: var(--sans);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 1rem;
-  opacity: 0.85;
-}
-
-.chapter h2 {
-  font-family: var(--serif);
-  font-size: 1.85rem;
-  font-weight: 900;
-  line-height: 1.4;
-  color: var(--text);
-  margin-bottom: 0.6rem;
-  letter-spacing: -0.01em;
-}
-
-.chapter h3 {
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text);
-  margin: 3rem 0 1.25rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-light);
-}
-
-.chapter h3:first-of-type {
-  border-top: none;
-  padding-top: 0;
-}
-
-.chapter h4 {
-  font-family: var(--sans);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text);
-  margin: 2.25rem 0 0.75rem;
-  letter-spacing: 0.02em;
-}
-
-.chapter p {
-  margin-bottom: 1.35rem;
-  text-align: justify;
-  word-break: keep-all;
-  color: var(--text);
-}
-
-.chapter strong { color: var(--text); font-weight: 700; }
-
-/* === BLOCKQUOTE (핵심 메시지) === */
-.chapter blockquote {
-  margin: 2.75rem 0;
-  padding: 1.75rem 2rem 1.75rem 1.75rem;
-  background: linear-gradient(135deg, var(--accent-bg) 0%, rgba(249,245,237,0.5) 100%);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 10px 10px 0;
-  font-size: 0.92rem;
-  line-height: 1.8;
-  box-shadow: 0 2px 8px rgba(158,122,47,0.04);
-  position: relative;
-}
-
-.chapter blockquote::before {
-  content: '\201C';
-  position: absolute;
-  top: -0.1rem; left: 0.75rem;
-  font-family: var(--display);
-  font-size: 2.5rem;
-  color: var(--accent);
-  opacity: 0.15;
-  line-height: 1;
-}
-
-.chapter blockquote strong { color: var(--accent); }
-
-/* === DANGER CALLOUT === */
-.danger-callout {
-  margin: 2rem 0;
-  padding: 1.25rem 1.5rem 1.25rem 1.25rem;
-  background: var(--red-bg);
-  border-left: 3px solid var(--red);
-  border-radius: 0 8px 8px 0;
-  font-family: var(--sans);
-  font-size: 0.88rem;
-  line-height: 1.75;
-  color: var(--text);
-}
-
-.danger-callout::before {
-  content: '⚠ 주의';
-  display: block;
-  font-weight: 700;
-  color: var(--red);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.5rem;
-}
-
-.danger-callout strong { color: var(--red); }
-
-/* === TIP CALLOUT === */
-.tip-callout {
-  margin: 2rem 0;
-  padding: 1.25rem 1.5rem 1.25rem 1.25rem;
-  background: var(--green-bg);
-  border-left: 3px solid var(--green);
-  border-radius: 0 8px 8px 0;
-  font-family: var(--sans);
-  font-size: 0.88rem;
-  line-height: 1.75;
-  color: var(--text);
-}
-
-.tip-callout::before {
-  content: '💡 실전 팁';
-  display: block;
-  font-weight: 700;
-  color: var(--green);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.5rem;
-}
-
-.tip-callout strong { color: var(--green); }
-
-/* === AUTHOR NOTE === */
-.author-note {
-  margin: 2rem 0;
-  padding: 1.5rem 1.75rem;
-  background: var(--accent-bg);
-  border-radius: 10px;
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  line-height: 1.75;
-  color: var(--text-secondary);
-  position: relative;
-}
-
-.author-note::before {
-  content: '✍ 저자의 한마디';
-  display: block;
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-/* === TABLES === */
-.table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin: 2rem 0 2.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04), 0 0 0 1px var(--border-light);
-}
-
-.chapter table {
-  width: 100%;
-  min-width: 480px;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-family: var(--sans);
-  font-size: 0.82rem;
-  line-height: 1.65;
-  margin: 0;
-}
-
-.chapter thead th {
-  background: var(--bg-sidebar);
-  padding: 0.85rem 1.1rem;
-  text-align: left;
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  border-bottom: 1.5px solid var(--border);
-}
-
-.chapter tbody td {
-  padding: 0.75rem 1.1rem;
-  border-bottom: 1px solid var(--border-light);
-  vertical-align: top;
-}
-
-.chapter tbody tr:last-child td { border-bottom: none; }
-.chapter tbody tr:hover { background: rgba(158,122,47,0.025); }
-
-/* Green/Red signal columns */
-.chapter td:nth-child(2) { color: var(--green); font-weight: 500; }
-.chapter td:nth-child(3) { color: var(--red); font-weight: 500; }
-
-/* === HORIZONTAL RULE === */
-.chapter hr {
-  border: none;
-  height: 1px;
-  background: linear-gradient(90deg, var(--border-light), var(--border), var(--border-light));
-  margin: 2.25rem 0;
-}
-
-/* === PROGRESS BAR === */
-.progress-bar {
-  position: fixed; top: 0; left: 280px; right: 0;
-  height: 2px;
-  background: transparent;
-  z-index: 50;
-}
-
-.progress-bar .fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-light));
-  width: 0;
-  transition: width 0.2s var(--transition);
-  box-shadow: 0 0 8px rgba(158,122,47,0.3);
-}
-
-/* === BACK TO TOP === */
-.back-to-top {
-  position: fixed; bottom: 2.5rem; right: 2.5rem;
-  width: 42px; height: 42px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  opacity: 0; transform: translateY(12px);
-  transition: all 0.35s var(--transition);
-  z-index: 50;
-  font-size: 1rem;
-  color: var(--text-light);
-}
-
-.back-to-top.visible { opacity: 1; transform: translateY(0); }
-.back-to-top:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-/* === FOOTER === */
-.book-footer {
-  max-width: var(--chapter-width);
-  margin: 0 auto;
-  padding: 4rem 2rem 5rem;
-  text-align: center;
-  font-family: var(--sans);
-  font-size: 0.75rem;
-  color: var(--text-light);
-  letter-spacing: 0.02em;
-}
-
-.book-footer .footer-divider {
-  width: 32px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-  margin: 0 auto 2rem;
-}
-
-/* === SELECTION === */
-::selection {
-  background: rgba(158,122,47,0.15);
-  color: var(--text);
-}
-
-/* === RESPONSIVE === */
-@media (max-width: 960px) {
-  .sidebar { transform: translateX(-100%); }
-  .menu-open .sidebar { transform: translateX(0); }
-  .menu-toggle { display: flex; }
-  .main { margin-left: 0; }
-  .progress-bar { left: 0; }
-  .cover h1 { font-size: 2.2rem; }
-  html { font-size: 16px; }
-}
-
-@media (max-width: 600px) {
-  .chapter { padding: 3.5rem 1.5rem 4rem; }
-  .cover h1 { font-size: 1.75rem; }
-  .cover .subtitle { font-size: 0.95rem; }
-  .chapter h2 { font-size: 1.45rem; }
-  .chapter h3 { font-size: 1.1rem; }
-  .chapter table { font-size: 0.75rem; }
-  .chapter thead th, .chapter tbody td { padding: 0.55rem 0.7rem; }
-  .sidebar { width: 270px; }
-  .chapter blockquote { padding: 1.25rem 1.25rem 1.25rem 1.25rem; }
-  .table-wrap { margin: 1.5rem -0.5rem 2rem; border-radius: 8px; }
-  .table-wrap::after {
-    content: '← 좌우 스크롤';
-    display: block;
-    text-align: center;
-    font-family: var(--sans);
-    font-size: 0.65rem;
-    color: var(--text-light);
-    padding: 0.4rem 0;
-  }
-}
-
-/* Scrollbar */
-.sidebar::-webkit-scrollbar { width: 3px; }
-.sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
-
-/* Print */
-@media print {
-  .sidebar, .menu-toggle, .progress-bar, .back-to-top, .overlay { display: none !important; }
-  .main { margin-left: 0; }
-  .chapter { page-break-after: always; padding: 2rem 0; }
-  .cover { min-height: auto; page-break-after: always; }
-}
+::selection{background:rgba(196,154,42,.15)}
 </style>
 </head>
 <body>
 
-<!-- Mobile Menu Toggle -->
-<button class="menu-toggle" onclick="toggleMenu()" aria-label="목차 열기">
-  <span></span>
-</button>
-<div class="overlay" onclick="toggleMenu()"></div>
+<div id="progress"></div>
+<div id="pct">0%</div>
+<div id="overlay" onclick="closeSB()"></div>
+<button id="menu-btn" aria-label="메뉴" onclick="openSB()">&#9776;</button>
 
-<!-- Progress Bar -->
-<div class="progress-bar"><div class="fill" id="progressFill"></div></div>
-
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <div class="book-icon">📘 전자공시 시그널</div>
-    <div class="book-subtitle">공시로 읽는 투자의 기술</div>
+<nav id="sidebar">
+  <div class="sb-head">
+    <h2>전자공시 시그널</h2>
+    <div class="sub">공시로 읽는 투자의 기술</div>
   </div>
-  <nav>
-    <a href="#cover" class="nav-special">표지</a>
-    <a href="#prologue" class="nav-special">프롤로그</a>
+  <div id="toc"></div>
+</nav>
 
-    <div class="nav-chapter">제1장 — 투자자의 첫 번째 도구</div>
-    <a href="#ch1-1">1.1 공시, 한마디로 뭔가요?</a>
-    <a href="#ch1-2">1.2 DART, 이렇게 사용하세요</a>
-    <a href="#ch1-3">1.3 공시의 종류 — 4가지만 기억하세요</a>
+<div id="main">
+<div class="page">
 
-    <div class="nav-chapter">제2장 — 놓치고 있는 기회</div>
-    <a href="#ch2-1">2.1 공시 하나로 주가가 30% 뛴 날</a>
-    <a href="#ch2-2">2.2 공시를 안 봐서 돈을 잃은 날</a>
-    <a href="#ch2-3">2.3 기관과 개인의 정보 격차</a>
-
-    <div class="nav-chapter">제3장 — 실전 가이드</div>
-    <a href="#ch3-1">3.1 사업보고서 읽는 법</a>
-    <a href="#ch3-2">3.2 주요사항보고서 읽는 법</a>
-    <a href="#ch3-3">3.3 지분변동공시 읽는 법</a>
-    <a href="#ch3-4">3.4 감사보고서 읽는 법</a>
-
-    <div class="nav-chapter">제4장 — 투자 판단</div>
-    <a href="#ch4-1">4.1 수주/계약 공시</a>
-    <a href="#ch4-2">4.2 자금조달 공시</a>
-    <a href="#ch4-3">4.3 내부자 지분 변동</a>
-    <a href="#ch4-4">4.4 감사의견/관리종목</a>
-    <a href="#ch4-5">4.5 업종별 핵심 공시</a>
-    <a href="#ch4-6">4.6 최종 의사결정 체크리스트</a>
-
-    <a href="#epilogue" class="nav-special" style="margin-top:0.5rem">에필로그</a>
-    <a href="#appendix" class="nav-special">부록</a>
-  </nav>
-</aside>
-
-<!-- Main Content -->
-<div class="main">
-
-  <!-- COVER -->
-  <section class="cover" id="cover">
-    <div class="cover-content">
-      <div class="cover-badge">Investment Guide 2026</div>
-      <h1>전자공시 <em>Signal</em></h1>
-      <p class="subtitle">공시로 읽는 투자의 기술</p>
-      <div class="divider-line"></div>
-      <p class="author">DART 공시 데이터 기반 · 실전 투자 의사결정 가이드북</p>
+  <div class="cover">
+    <div class="cover-inner">
+      <div class="cover-badge">INVESTMENT GUIDE 2026</div>
+      <div class="cover-line"></div>
+      <h1 class="cover-title">전자공시 <em>Signal</em></h1>
+      <p class="cover-subtitle">공시로 읽는 투자의 기술</p>
+      <div class="cover-line"></div>
+      <p class="cover-meta">DART 공시 데이터 기반 &middot; 실전 투자 의사결정 가이드북</p>
     </div>
-  </section>
+  </div>
 
-  <!-- PROLOGUE -->
   <section class="chapter" id="prologue">
     <div class="chapter-label">Prologue</div>
-    <h2>이 책을 펼친 당신에게 — 공시는 어렵지 않습니다</h2>
+    <h2>이 책을 펼친 당신에게 &mdash; 공시는 어렵지 않습니다</h2>
+    <p>주식 투자를 시작하면 가장 먼저 부딪히는 벽이 있습니다. 어떤 정보를 믿어야 할지 모르겠다는 것입니다. 유튜브에서는 &ldquo;이 종목 무조건 갑니다&rdquo;라고 하고, 카카오톡 리딩방에서는 &ldquo;지금 안 사면 늦습니다&rdquo;라고 합니다. 뉴스 기사의 전망은 매일 바뀌고, 증권사 리포트의 목표가도 오르내립니다. 대체 누구 말을 믿어야 할까요?</p>
+    <p>답은 의외로 단순합니다. <strong>법적 책임이 따르는 공식 정보</strong>를 직접 확인하면 됩니다. 그것이 바로 <strong>공시(公示)</strong>입니다. 기업이 금융감독원 전자공시시스템(DART)에 올리는 사업보고서, 수주 계약, 유상증자, 감사보고서 같은 문서에는 대표이사와 감사인의 서명이 찍혀 있고, 거짓을 쓰면 처벌받습니다.</p>
     <hr>
-    <p>주식 투자를 시작하면 가장 먼저 부딪히는 벽이 있습니다. 어떤 정보를 믿어야 할지 모르겠다는 것입니다. 유튜브에서는 "이 종목 무조건 갑니다"라고 하고, 카카오톡 리딩방에서는 "지금 안 사면 늦습니다"라고 합니다. 뉴스 기사의 전망은 매일 바뀌고, 증권사 리포트의 목표가도 오르내립니다. 대체 누구 말을 믿어야 할까요?</p>
-    <p>답은 의외로 단순합니다. <strong>법적 책임이 따르는 공식 정보</strong>를 직접 확인하면 됩니다. 그것이 바로 <strong>공시(公示)</strong>입니다. 기업이 금융감독원 전자공시시스템(DART)에 올리는 사업보고서, 수주 계약, 유상증자, 감사보고서 같은 문서에는 대표이사와 감사인의 서명이 찍혀 있고, 거짓을 쓰면 처벌받습니다. 유튜버의 말에는 법적 책임이 없지만, 공시에는 있습니다.</p>
-    <hr>
-    <p>이 책은 <strong>"공시가 뭔지 모르는 사람"이 읽기 시작해서 "공시를 보고 투자 판단을 내릴 수 있는 사람"이 되는 것</strong>을 목표로 씌어졌습니다. 전문 용어가 나올 때마다 쉬운 비유를 함께 달았고, 모든 섹션은 "그래서 나는 뭘 해야 하는데?"라는 질문에 답하도록 구성했습니다.</p>
-    <p><strong>제1장</strong>에서는 공시의 개념, DART 사용법, 공시의 4가지 종류를 기초부터 설명합니다. <strong>제2장</strong>에서는 공시를 보면 돈이 되는 이유를 실제 사례로 보여줍니다. <strong>제3장</strong>에서는 사업보고서, 주요사항보고서, 지분변동공시, 감사보고서를 실제로 열었을 때 어디를 어떻게 봐야 하는지 단계별로 안내합니다. <strong>제4장</strong>에서는 특정 공시가 떴을 때 "사야 할까, 팔아야 할까"를 판단하는 구체적인 기준을 제시합니다. 그리고 <strong>부록</strong>에서 DART 메뉴 요약, 공시 용어 사전, 시그널 대조표를 한눈에 정리했습니다.</p>
+    <p>이 책은 <strong>&ldquo;공시가 뭔지 모르는 사람&rdquo;이 읽기 시작해서 &ldquo;공시를 보고 투자 판단을 내릴 수 있는 사람&rdquo;이 되는 것</strong>을 목표로 씌어졌습니다. 전문 용어가 나올 때마다 쉬운 비유를 함께 달았고, 모든 섹션은 &ldquo;그래서 나는 뭘 해야 하는데?&rdquo;라는 질문에 답하도록 구성했습니다.</p>
+    <p><strong>제1장</strong>에서는 공시의 개념, DART 사용법, 공시의 4가지 종류를 기초부터 설명합니다. <strong>제2장</strong>에서는 공시를 보면 돈이 되는 이유를 실제 사례로 보여줍니다. <strong>제3장</strong>에서는 사업보고서, 주요사항보고서, 지분변동공시, 감사보고서를 실제로 열었을 때 어디를 어떻게 봐야 하는지 단계별로 안내합니다. <strong>제4장</strong>에서는 특정 공시가 떴을 때 &ldquo;사야 할까, 팔아야 할까&rdquo;를 판단하는 구체적인 기준을 제시합니다. 그리고 <strong>부록</strong>에서 DART 메뉴 요약, 공시 용어 사전, 시그널 대조표를 한눈에 정리했습니다.</p>
     <hr>
     <p>이 책의 활용법은 단순합니다. DART(dart.fss.or.kr)에 접속해서 관심 종목 하나의 사업보고서를 열어보세요. 그리고 이 책의 체크리스트를 따라가 보세요. 처음에는 시간이 걸리지만, 서너 번 반복하면 핵심을 빠르게 잡아내는 눈이 생깁니다. 공시를 읽는 능력은 타고나는 것이 아니라, 연습으로 기르는 것입니다.</p>
   </section>
 
-  <!-- Content will be injected by JavaScript -->
   <div id="chapters-container"></div>
 
-  <!-- FOOTER -->
   <div class="book-footer">
-    <div class="footer-divider"></div>
-    <p>&copy; 2026 전자공시 시그널 — 공시로 읽는 투자의 기술</p>
-    <p style="margin-top:0.5rem">본 가이드북은 투자 교육 목적으로 제작되었으며, 특정 종목에 대한 매수·매도 추천이 아닙니다.</p>
+    <p>&copy; 2026 전자공시 시그널 &mdash; 공시로 읽는 투자의 기술</p>
+    <p style="margin-top:.5rem">본 가이드북은 투자 교육 목적으로 제작되었으며, 특정 종목에 대한 매수&middot;매도 추천이 아닙니다.</p>
   </div>
 
 </div>
+</div>
 
-<!-- Back to Top -->
-<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0})">&#8593;</button>
+<button id="theme-btn" aria-label="테마 전환" onclick="toggleTheme()">&#9788;</button>
+<button id="top-btn" aria-label="맨 위로" onclick="window.scrollTo({top:0,behavior:'smooth'})">&uarr;</button>
 
 <script>
 // === CHAPTER DATA ===
@@ -1240,93 +756,124 @@ function renderChapters() {
   let html = '';
 
   chapters.forEach(ch => {
-    html += `<section class="chapter" id="${ch.id}">`;
-    html += `<div class="chapter-label">${ch.label}</div>`;
-    html += `<h2>${ch.title}</h2>`;
+    html += '<section class="chapter" id="' + ch.id + '">';
+    html += '<div class="chapter-label">' + ch.label + '</div>';
+    html += '<h2>' + ch.title + '</h2>';
 
     ch.sections.forEach(s => {
-      html += `<h3>${s.h}</h3>`;
-      s.p.forEach(p => { if(p.startsWith('<div')) { html += p; } else { html += `<p>${p}</p>`; } });
+      html += '<h3>' + s.h + '</h3>';
+      s.p.forEach(p => { if(p.startsWith('<div')) { html += p; } else { html += '<p>' + p + '</p>'; } });
     });
 
     if (ch.table) {
-      html += '<h4>📊 시그널 대조표</h4><div class="table-wrap"><table><thead><tr>';
-      ch.table.head.forEach(h => { html += `<th>${h}</th>`; });
+      html += '<h4>&#128202; 시그널 대조표</h4><div class="table-wrap"><table><thead><tr>';
+      ch.table.head.forEach(h => { html += '<th>' + h + '</th>'; });
       html += '</tr></thead><tbody>';
       ch.table.rows.forEach(r => {
         html += '<tr>';
-        r.forEach(c => { html += `<td>${c}</td>`; });
+        r.forEach(c => { html += '<td>' + c + '</td>'; });
         html += '</tr>';
       });
       html += '</tbody></table></div>';
     }
 
     if (ch.quote) {
-      html += `<blockquote><strong>핵심 메시지</strong>: ${ch.quote}</blockquote>`;
+      html += '<blockquote><strong>핵심 메시지</strong>: ' + ch.quote + '</blockquote>';
     }
 
     html += '</section>';
   });
 
   // Epilogue
-  html += `<section class="chapter" id="${epilogueData.id}">`;
-  html += `<div class="chapter-label">${epilogueData.label}</div>`;
-  html += `<h2>${epilogueData.title}</h2><hr>`;
-  epilogueData.paragraphs.forEach(p => { html += `<p>${p}</p>`; });
-  html += `<hr><p style="text-align:center;color:var(--text-light);font-size:0.9rem;margin-top:2rem">본 가이드북의 내용에 대한 피드백은 언제든 환영합니다.<br>본 자료는 투자 교육 목적이며, 특정 종목에 대한 매수·매도 추천이 아닙니다.</p>`;
+  html += '<section class="chapter" id="' + epilogueData.id + '">';
+  html += '<div class="chapter-label">' + epilogueData.label + '</div>';
+  html += '<h2>' + epilogueData.title + '</h2><hr>';
+  epilogueData.paragraphs.forEach(p => { html += '<p>' + p + '</p>'; });
+  html += '<hr><p style="text-align:center;color:var(--text3);font-size:.9rem;margin-top:2rem">본 가이드북의 내용에 대한 피드백은 언제든 환영합니다.<br>본 자료는 투자 교육 목적이며, 특정 종목에 대한 매수·매도 추천이 아닙니다.</p>';
   html += '</section>';
 
   container.innerHTML = html;
 }
 
-// === INTERACTIONS ===
-function toggleMenu() {
-  document.body.classList.toggle('menu-open');
+// === TOC BUILD ===
+function buildTOC() {
+  const toc = document.getElementById('toc');
+  let html = '<a href="#prologue" data-id="prologue">프롤로그</a>';
+  const chapterMap = {};
+  chapters.forEach(ch => {
+    const m = ch.label.match(/제(\d)장/);
+    if (m) {
+      const cn = m[1];
+      if (!chapterMap[cn]) {
+        const titles = {
+          '1': '제1장 — 투자자의 첫 번째 도구',
+          '2': '제2장 — 놓치고 있는 기회',
+          '3': '제3장 — 실전 가이드',
+          '4': '제4장 — 투자 판단'
+        };
+        chapterMap[cn] = true;
+        html += '<div class="toc-part">' + (titles[cn]||'') + '</div>';
+      }
+    }
+    if (ch.id === 'appendix') {
+      html += '<div class="toc-part">부록</div>';
+    }
+    html += '<a href="#' + ch.id + '" data-id="' + ch.id + '">' + ch.title + '</a>';
+  });
+  html += '<a href="#epilogue" data-id="epilogue">에필로그</a>';
+  toc.innerHTML = html;
 }
 
-// Close sidebar on nav click (mobile)
-document.querySelectorAll('.sidebar a').forEach(a => {
-  a.addEventListener('click', () => {
-    if (window.innerWidth <= 960) document.body.classList.remove('menu-open');
-  });
-});
+// === SIDEBAR ===
+function openSB() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').style.display='block'; }
+function closeSB() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').style.display='none'; }
+document.querySelectorAll('#toc a').forEach(a => { a.addEventListener('click', () => { if(window.innerWidth<=900) closeSB(); }); });
 
-// Progress bar
-function updateProgress() {
-  const winH = window.innerHeight;
-  const docH = document.documentElement.scrollHeight - winH;
+// === THEME ===
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('theme', t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '\u263E' : '\u2600';
+}
+function toggleTheme() {
+  setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+(function() { const t = localStorage.getItem('theme'); if (t) setTheme(t); })();
+
+// === SCROLL ===
+function onScroll() {
   const scrolled = window.scrollY;
-  document.getElementById('progressFill').style.width = Math.min((scrolled / docH) * 100, 100) + '%';
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  const pctVal = Math.min(Math.round((scrolled / docH) * 100), 100);
+  document.getElementById('progress').style.width = pctVal + '%';
+  document.getElementById('pct').textContent = pctVal + '%';
 
-  // Back to top
-  const btn = document.getElementById('backToTop');
-  btn.classList.toggle('visible', scrolled > 600);
-}
+  if (scrolled > 100) document.body.classList.add('reading');
+  else document.body.classList.remove('reading');
 
-// Active nav
-function updateActiveNav() {
-  const sections = document.querySelectorAll('.chapter, .cover');
-  const links = document.querySelectorAll('.sidebar a');
+  document.getElementById('top-btn').style.display = scrolled > 500 ? 'flex' : 'none';
+
+  // Active TOC
+  const sections = document.querySelectorAll('.chapter');
+  const links = document.querySelectorAll('#toc a');
   let current = '';
-
   sections.forEach(s => {
-    const top = s.offsetTop - 120;
-    if (window.scrollY >= top) current = s.id;
+    const top = s.offsetTop - 150;
+    if (scrolled >= top) current = s.id;
   });
-
   links.forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    a.classList.toggle('active', a.getAttribute('data-id') === current);
   });
 }
+window.addEventListener('scroll', onScroll, { passive: true });
 
-window.addEventListener('scroll', () => {
-  updateProgress();
-  updateActiveNav();
-}, { passive: true });
-
-// Init
+// === INIT ===
 renderChapters();
-updateProgress();
+buildTOC();
+onScroll();
+
+// Re-bind toc click after build
+document.querySelectorAll('#toc a').forEach(a => { a.addEventListener('click', () => { if(window.innerWidth<=900) closeSB(); }); });
 </script>
 </body>
 </html>
